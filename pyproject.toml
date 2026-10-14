@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autor-outer"
+version = "0.1.0"
+description = "A small, fixed outer loop for evolving agent harnesses"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+autor = "autor.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["autor*"]
+
+[tool.setuptools.package-data]
+autor = ["skills/autor-research/SKILL.md", "data/HUMANEVAL_LICENSE"]

@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "type": "sanitized_acceptance_summary",
+  "release": "0.1.0",
+  "date": "2026-10-13",
+  "outer_hash": "4955ed0cf50b38d2ec470912433bb0a1814bf0517c1b7343c42c7357c4f4986b",
+  "model": "gpt-6-astra",
+  "reasoning_effort": "low",
+  "codex_cli": "0.153.4",
+  "benchmark_revision": "6d43fb980f9fee3c892a914eda09951f772ad10d",
+  "task_ids": [
+    "HumanEval/0"
+  ],
+  "environment_scope": "Two clean virtualenvs on the same host; shared existing Codex authentication. No second OS or Harbor job.",
+  "acceptance_steps": [
+    {
+      "step": "venv-a",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.011991665931418538
+    },
+    {
+      "step": "install-a",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.043029291089624166
+    },
+    {
+      "step": "import-a",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.023065833025611937
+    },
+    {
+      "step": "venv-b",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.0096994589548558
+    },
+    {
+      "step": "install-b",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.03531170799396932
+    },
+    {
+      "step": "import-b",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.022667999961413443
+    },
+    {
+      "step": "demo",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.6144639169797301
+    },
+    {
+      "step": "demo-resume",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.02881387504749
+    },
+    {
+      "step": "demo-export",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.028577542048878968
+    },
+    {
+      "step": "real-init",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 1.6597214170033112
+    },
+    {
+      "step": "real-doctor",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.037333040963858366
+    },
+    {
+      "step": "real-loop",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 61.747068291995674
+    },
+    {
+      "step": "real-resume",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.032930957968346775
+    },
+    {
+      "step": "real-export",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.0282493329141289
+    },
+    {
+      "step": "moved-demo-verify",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 1.5284121669828892
+    },
+    {
+      "step": "moved-demo-run",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.03180579200852662
+    },
+    {
+      "step": "moved-demo-no-replay",
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.026362999924458563
+    },
+    {
+      "step": "tamper-rejected",
+      "exit_code": 1,
+      "expected_exit": 1,
+      "seconds": 0.028835666016675532
+    },
+    {
+      "step": "moved-real-verify",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 0.02591608394868672
+    },
+    {
+      "step": "moved-real-run",
+      "exit_code": 0,
+      "expected_exit": 0,
+      "seconds": 16.08774337498471
+    }
+  ],
+  "results": {
+    "baseline": 0.0,
+    "child": 1.0,
+    "best": "c0001",
+    "seconds": 61.70500749896746,
+    "proposals": 1,
+    "evaluations": 2
+  },
+  "export_rerun": {
+    "score": 1.0,
+    "backend": "codex-humaneval-local",
+    "synthetic": false
+  },
+  "diagnosis": "evidence.json reports that the sole sampled task failed with AssertionError (score 0.0), with prompt activation verified. parent/prompt.md explicitly requires every function to return None without implementing its behavior. This scaffold-only instruction plausibly explains the failure; no other candidates are recorded.",
+  "hypothesis": "Replacing the scaffold-only directive with an instruction to implement the supplied specification should enable functional solutions across tasks while preserving the output interface. This general clarification is unconfirmed until evaluation.",
+  "baseline_feedback": "Original HumanEval tests failed (AssertionError).",
+  "tests": {
+    "python312_harbor0240": {
+      "passed": 36,
+      "skipped": 0
+    },
+    "python396": {
+      "passed": 33,
+      "skipped": 3
+    }
+  },
+  "original_evidence_sha256": {
+    "acceptance.json": "2e86d6ac83ba1817ced9958029d8befa4da5bbf2a811ff72ef1544258879c7d6",
+    "baseline-evaluation.json": "5dfd32d58bc501e2f34269dca05b7938c1700793f9719ed82a1adb596a718b70",
+    "change.patch": "064cd55da53a73f4389cac1c8ffa2fd3a880963e6c25d1f61ac78cd553085ad3",
+    "child-evaluation.json": "ea9c540f4133fd755826fd36eb0d729b69e25f062a61ad2b7256440fc078fb57",
+    "export-evaluation.json": "d995d65978d71d13c5867c6fd83a439d6174ebd1d504a332273fe23315852c14",
+    "proposal.json": "02a23a556d0463d100cbd18eb865f1069b3335534297d8457280c629864a98cd",
+    "run.json": "b8c2ac6e470c2bfa4712e042bd205bb330998373535f7cd9f3eb97a434eb87c2",
+    "skill-validation.log": "db349825903d66adffea3ecf1bd8e1803043e8a71cf1a051235dabc5371f5bb0",
+    "tests-python312.log": "9ee0aa784d385cabcb956215303e84a810ce9b46990c41be0017e3573868ef41",
+    "tests-system-python.log": "fe55e19ead603d0a22b8321e7d50e4eaf10496fb3aad43a7895938f2ed3acd92"
+  },
+  "limitations": [
+    "Seed was deliberately misconfigured in scaffold-only mode.",
+    "No demonstrated generalization improvement.",
+    "Both clean environments were on the same macOS host; no live Docker/Harbor run."
+  ],
+  "provenance_note": "Derived from frozen local records. Host paths, usernames and raw session logs are omitted. Original evidence remains in the local v0.1.0 delivery; these digests are not a third-party signature."
+}
