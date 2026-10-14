@@ -136,6 +136,29 @@ python3 scripts/accept_release.py \
 
 ## Harbor 0.24.0 路径
 
+### 当前优先：固定四题的 baseline pilot
+
+这条入口不调用 outer，只用未修改的 inner 测量搜索任务。先由评测维护者在搜索环境之外固定两道保留任务清单，加入随机 salt/nonce，计算该文件原始字节的 SHA-256；只把摘要交给准备命令，勿传入清单、题名或评测结果。
+
+```bash
+python3 scripts/terminal_bench_pilot.py prepare runs/tb-pilot \
+  --inner-model '<可用的 Harbor 模型名称>' \
+  --inner-version '<固定 Codex npm 版本，例如 0.153.4>' \
+  --holdout-commitment '<评测维护者提供的 64 位 SHA-256>'
+uv run --python 3.12 --with harbor==0.24.0 \
+  python scripts/terminal_bench_pilot.py check runs/tb-pilot
+uv run --python 3.12 --with harbor==0.24.0 \
+  python scripts/terminal_bench_pilot.py run runs/tb-pilot
+```
+
+Harbor 的 inner 认证不同于宿主机 Codex 自动登录：默认使用 OPENAI_API_KEY；若明确使用已有 ChatGPT 登录文件，可在执行环境设置 `CODEX_FORCE_AUTH_JSON=1`，或用 `CODEX_AUTH_JSON_PATH` 指向该环境的登录文件。这些选项已从 Harbor 0.24.0 的 Codex adapter 核实，但当前未完成真实容器认证验证。预检只检查文件/环境变量是否存在，不读取或打印凭据值；不要把凭据提交到仓库。
+
+准备与 check 不调用模型；run 最多串行执行四次 inner，预算总计 1200 秒，每题 agent 上限 180 秒。它冻结 job 和 prompt，拒绝变更或自动重放已有 started.json。启动后中断时，需要检查 Docker 是否还有残留作业；本地进程取消不等于 daemon 内容器一定已清理。
+
+完成后查看 baseline-result.json 与 jobs/evaluation 下的逐题日志。任务异常或缺失会生成 failure.json，不给整轮伪造零分。先判断真实失败是否可分析，再创建 inner 比较实验；当前脚本不会自动启动搜索，也不会访问保留任务。镜像架构、npm 版本和模型可用性需要环境就绪后的 smoke 验证。
+
+### 原有单轮 outer + Harbor 入口
+
 需要 Docker daemon 和可用模型凭据；下列参数由使用者明确填写，不默认选择模型或浮动版本。
 
 ```bash

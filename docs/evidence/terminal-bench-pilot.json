@@ -1,0 +1,48 @@
+{
+  "status": "prepared_not_run",
+  "date": "2026-10-14",
+  "search_tasks": [
+    "fix-git",
+    "log-summary-date-ranges",
+    "nginx-request-logging",
+    "cancel-async-tasks"
+  ],
+  "task_revision": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+  "heldout_count": 2,
+  "holdout_commitment": "aef243d350225811b33ba4c4d934e527dfaf861f77b34c7e4f303aa0961ff605",
+  "holdout_isolation_status": "Locally curated only; independent evaluator isolation still required before running any proposer.",
+  "limits": {
+    "agent_seconds_per_task": 180,
+    "total_seconds": 1200,
+    "attempts": 1,
+    "retries": 0,
+    "proposer_calls": 0
+  },
+  "preflight_with_existing_auth_file_opt_in": {
+    "ready": false,
+    "checks": [
+      {
+        "check": "Harbor 0.24.0",
+        "ok": true,
+        "detail": "Ready"
+      },
+      {
+        "check": "Linux Docker daemon",
+        "ok": false,
+        "detail": "Executable unavailable"
+      },
+      {
+        "check": "Harbor inner authentication configured",
+        "ok": true,
+        "detail": "Presence check only; no credential values read and no model request made"
+      }
+    ]
+  },
+  "tests": {
+    "passed": 40,
+    "skipped": 0,
+    "harbor": "0.24.0"
+  },
+  "measurement": null,
+  "note": "No Terminal-Bench model calls or benchmark scores yet. Authentication was checked for presence only."
+}
