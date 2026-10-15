@@ -206,14 +206,15 @@ class OuterTests(unittest.TestCase):
         self.init()
         fake = self.base / "fake-codex"
         fake.write_text("#!" + sys.executable + "\nimport sys,json\nfrom pathlib import Path\n"
-                        "assert '--sandbox' in sys.argv and 'read-only' in sys.argv\n"
+                        "assert '--sandbox' not in sys.argv and any('default_permissions=' in a for a in sys.argv)\n"
                         "assert 'fixed outer loop' in sys.stdin.read()\n"
                         "out=Path(sys.argv[sys.argv.index('--output-last-message')+1])\n"
                         "out.write_text(json.dumps({'hypothesis':'test','edits':[]}))\n")
         fake.chmod(0o755)
         config = copy.deepcopy(self.config)
         config["proposer"] = {"kind": "codex", "model": "test-model", "executable": str(fake)}
-        result = adapters.propose(config, self.root / "candidates/c0000/harness", {"proposal_number": 1}, self.base / "propose", 5)
+        with patch("autor.permissions.verify_boundary", return_value={"fixture": True}):
+            result = adapters.propose(config, self.root / "candidates/c0000/harness", {"proposal_number": 1}, self.base / "propose", 5)
         self.assertEqual(result["hypothesis"], "test")
         self.assertTrue((self.base / "propose/logs/stdout.log").exists())
 

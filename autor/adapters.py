@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import time
 import sys
 import hashlib
 
@@ -54,14 +55,19 @@ def propose(config, parent, evidence, work, timeout):
     prompt += "\nRequired text: " + json.dumps(config.get("required_text", {}))
     prompt += "\nRead parent/ and evidence.json. Return one JSON proposal using the output schema."
     (work / "request.txt").write_text(prompt, encoding="utf-8")
-    argv = [config["proposer"].get("executable", "codex"), "exec", "--ignore-user-config",
-            "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral", "--json",
+    from .permissions import config_args, verify_boundary
+    executable = config["proposer"].get("executable", "codex")
+    started = time.monotonic()
+    verify_boundary(executable, work, min(timeout, 15))
+    remaining = timeout - (time.monotonic() - started)
+    argv = [executable, "exec", "--ignore-user-config",
+            *config_args(work), "--skip-git-repo-check", "--ephemeral", "--json",
             "--model", config["proposer"]["model"],
             "-c", 'model_reasoning_effort=' + json.dumps(config["proposer"].get("reasoning_effort", "low")),
             "-c", 'approval_policy="never"',
             "--output-schema", str(work / "schema.json"),
             "--output-last-message", str(work / "response.json"), "-"]
-    run_process(argv, work, work / "logs", timeout, stdin=prompt)
+    run_process(argv, work, work / "logs", remaining, stdin=prompt)
     proposal = read_json(work / "response.json")
     proposal["usage"] = codex_usage(work / "logs/stdout.log")
     return proposal

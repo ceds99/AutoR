@@ -26,9 +26,28 @@ from autor.storage import AutorError, digest, read_json, write_json
 
 REVISION = "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c"
 SEARCH_TASKS = ["fix-git", "log-summary-date-ranges", "nginx-request-logging", "cancel-async-tasks"]
+APT_CONFIG = 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "0";\n'
 
 
-def prepare(root, model, version, holdout_commitment):
+def runtime_digest(root):
+    """Hash trusted runtime files and internal symlinks; reject escapes/special files."""
+    root = Path(root).resolve()
+    entries = {}
+    for path in sorted(root.rglob("*")):
+        name = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            if root not in path.resolve().parents:
+                raise AutorError("Runtime symlink escapes its directory")
+            entries[name] = {"link": os.readlink(path)}
+        elif path.is_file():
+            entries[name] = {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                             "executable": bool(path.stat().st_mode & 0o111)}
+        elif not path.is_dir():
+            raise AutorError("Runtime contains a special file")
+    return digest(entries)
+
+
+def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_runtime=None):
     root = Path(root).resolve()
     if root.exists():
         raise AutorError("Choose a new pilot directory")
@@ -48,11 +67,36 @@ def prepare(root, model, version, holdout_commitment):
     job["tasks"] = [{"path": name, "git_url": "https://github.com/harbor-framework/terminal-bench-2.git",
                      "git_commit_id": REVISION, "source": "terminal-bench-2.0-pilot"} for name in SEARCH_TASKS]
     job["agents"][0]["kwargs"]["reasoning_effort"] = "low"
+    overrides = {}
+    if bounded_apt:
+        apt_path = root / "runtime/apt-network.conf"
+        apt_path.parent.mkdir(parents=True, exist_ok=True)
+        apt_path.write_text(APT_CONFIG, encoding="utf-8")
+        overrides["runtime/apt-network.conf"] = hashlib.sha256(apt_path.read_bytes()).hexdigest()
+        job["environment"]["mounts"] = [{"type": "bind", "source": str(apt_path),
+            "target": "/etc/apt/apt.conf.d/99autor-pilot-network", "read_only": True}]
+    if node_runtime:
+        source = Path(node_runtime).resolve()
+        expected = runtime_digest(source)
+        destination = root / "runtime/node"
+        shutil.copytree(source, destination, symlinks=True)
+        if runtime_digest(destination) != expected:
+            raise AutorError("Node runtime changed while staging")
+        overrides["runtime/node"] = expected
+        job["environment"].setdefault("mounts", []).append({"type": "bind", "source": str(destination),
+            "target": "/opt/autor-node", "read_only": True})
+        job["environment"]["env"] = {"BASH_ENV": "/etc/profile.d/autor-node.sh"}
+        # Source this in container bash commands without replacing the host Docker client PATH.
+        profile_path = root / "runtime/node-profile.sh"
+        profile_path.write_text('export PATH="/opt/autor-node/bin:$PATH"\n', encoding="utf-8")
+        overrides["runtime/node-profile.sh"] = hashlib.sha256(profile_path.read_bytes()).hexdigest()
+        job["environment"]["mounts"].append({"type": "bind", "source": str(profile_path),
+            "target": "/etc/profile.d/autor-node.sh", "read_only": True})
     write_json(root / "search-job.json", job)
     metadata = {"schema_version": 1, "mode": "baseline-only", "evaluator": settings,
                 "task_revision": REVISION, "holdout_count": 2, "holdout_commitment": holdout_commitment,
                 "job_hash": digest(job), "prompt_sha256": hashlib.sha256((harness / "prompt.md").read_bytes()).hexdigest(),
-                "max_seconds": 1200, "limitations": "Short-budget pilot, not an official leaderboard score. No holdout data is loaded and no proposer is called."}
+                "max_seconds": 1200, "runtime_overrides": overrides, "limitations": "Short-budget pilot, not an official leaderboard score. No holdout data is loaded and no proposer is called."}
     write_json(root / "pilot.json", metadata)
     write_json(root / "contract.json", {"pilot_sha256": digest(metadata)})
     return metadata
@@ -67,6 +111,15 @@ def load(root):
         raise AutorError("Pinned Harbor job changed")
     if hashlib.sha256((root / "harness/prompt.md").read_bytes()).hexdigest() != metadata["prompt_sha256"]:
         raise AutorError("Baseline prompt changed")
+    for name, expected in metadata.get("runtime_overrides", {}).items():
+        if name == "runtime/node":
+            actual = runtime_digest(root / name)
+        elif name in ("runtime/apt-network.conf", "runtime/node-profile.sh"):
+            actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
+        else:
+            raise AutorError("Unknown runtime override")
+        if actual != expected:
+            raise AutorError("Pinned runtime override changed")
     return metadata
 
 
@@ -76,13 +129,14 @@ def preflight(root):
     for name, argv, expected in [
         ("Harbor 0.24.0", ["harbor", "--version"], "0.24.0"),
         ("Linux Docker daemon", ["docker", "info", "--format", "{{.OSType}}"], "linux"),
+        ("Docker Compose", ["docker", "compose", "version", "--short"], None),
     ]:
         if shutil.which(argv[0]) is None:
             checks.append({"check": name, "ok": False, "detail": "Executable unavailable"})
             continue
         try:
             result = subprocess.run(argv, capture_output=True, text=True, timeout=15)
-            ok = result.returncode == 0 and expected in result.stdout.split()
+            ok = result.returncode == 0 and (expected in result.stdout.split() if expected else bool(result.stdout.strip()))
             checks.append({"check": name, "ok": ok, "detail": "Ready" if ok else "Version mismatch or service unavailable"})
         except (OSError, subprocess.TimeoutExpired):
             checks.append({"check": name, "ok": False, "detail": "Preflight failed or timed out"})
@@ -116,7 +170,7 @@ def run(root):
         return {"status": "ok", "score": result["score"], "failed_tasks": [t["task_id"] for t in result["tasks"] if t["score"] == 0],
                 "proposer_calls": 0, "holdout_evaluated": False}
     except BaseException as error:
-        write_json(root / "failure.json", {"status": "error", "error": str(error),
+        write_json(root / "failure.json", {"status": "error", "error": str(error) or type(error).__name__, "error_type": type(error).__name__,
                     "note": "Not a zero-score measurement. Inspect Harbor trials; uncertain calls are not automatically replayed."})
         raise
 
@@ -129,12 +183,14 @@ def main():
     init.add_argument("--inner-model", required=True)
     init.add_argument("--inner-version", required=True)
     init.add_argument("--holdout-commitment", required=True)
+    init.add_argument("--node-runtime", type=Path, help="Stage a trusted extracted Linux Node distribution as a hashed read-only runtime mount")
+    init.add_argument("--bounded-apt", action="store_true", help="Freeze an APT 15-second connection timeout with no retries; recorded runtime deviation")
     for command in ("check", "run"):
         sub.add_parser(command).add_argument("root", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "prepare":
-            result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment)
+            result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment, args.bounded_apt, args.node_runtime)
         elif args.command == "check":
             result = preflight(args.root)
             write_json(args.root / "preflight.json", result)

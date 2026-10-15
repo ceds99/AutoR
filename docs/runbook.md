@@ -1,6 +1,6 @@
 # 当前运行与交付手册
 
-当前开发版：0.2.0.dev0。冻结 v0.1.0 包用于重现历史实验；升级源码后请创建新实验，旧实验需使用匹配构建恢复。
+当前开发版：0.2.0.dev1。冻结 v0.1.0 包用于重现历史实验；升级源码后请创建新实验，旧实验需使用匹配构建恢复。
 
 AutoR 是固定的 outer：接收 inner seed，调用 proposer，校验文件修改，测量候选，保存血缘并导出。MA 不在本版运行链路内。首版真实预设只允许改 `prompt.md`，不修改模型、评测器或预算。
 
@@ -10,7 +10,7 @@ AutoR 是固定的 outer：接收 inner seed，调用 proposer，校验文件修
 |---|---|---|
 | 核心与合成演示 | Python 3.9+，macOS/Linux | macOS 两个独立 Python 3.12 虚拟环境 |
 | 本地真实 HumanEval | macOS、sandbox-exec、系统 Python、可用且已认证的 Codex CLI | 真实模型调用、原始测试、导出迁移后重新调用 |
-| Harbor | Python 3.12+、Harbor 0.24.0、Docker daemon、模型凭据 | schema / adapter / 模板兼容测试；未执行 Docker job |
+| Harbor | Python 3.12+、Harbor 0.24.0、Docker daemon、模型凭据 | 四题真实 Docker baseline 全通过；ARM＋Rosetta，固定短预算，未执行保留集 |
 | 自定义 BOS / command | 已实现同步 JSON 协议的外部命令 | 协议测试；外部服务由使用者提供 |
 
 从 GitHub 获取当前源码并安装：
@@ -75,6 +75,12 @@ python3 scripts/search_smoke.py runs/search-comparison
 
 `run --steps 1` 会完成一个新提案及其可用评测，然后暂停；再次 `run` 继续剩余名额。一代未完成时不做筛选。全部孩子失败时停止原因为 `search_exhausted`，已有最佳候选仍可导出。模型/运行错误仍以退出码 1 报告，不能因保留了 best 就忽略错误。
 
+## Proposer 访问检查
+
+真实 proposer 需要支持 permission profiles 和 `codex sandbox` 的 CLI；当前实测为 0.153.4。每次提案前会自动检查文件与命令网络权限，失败时不发模型请求。macOS 需要 CommandLineTools 的系统 Python；Linux 需要 `/usr/bin/python3` 和可用的 Codex 沙箱。不要删除检查或改回宽松权限来绕过失败。
+
+成功探测写入 `candidates/<id>/proposal/isolation.json`。该文件记录正常输入可读，以及目录外读取、符号链接、写入、命令网络被拒绝。父代和反馈只从控制器暂存的目录读取；不要把保留集、答案文件或凭据复制进去。对模型服务的认证流量不受命令网络禁用影响。
+
 ## 一次真实短闭环
 
 确认 `codex --version` 和 `codex login status` 可用。初始化固定 CLI 版本；实验中升级 CLI 会被拒绝。下面示例的模型必须是当前账户实际可用的显式模型 ID；本次验收使用 `gpt-6-astra`、low reasoning、CLI 0.153.4。
@@ -136,7 +142,7 @@ python3 scripts/search_smoke.py runs/search-comparison
 
 预算按调用次数与累计外部调用时间限制；不提供 token 或美元硬上限。固定模型名称不能锁定服务端模型权重，日志用于追溯条件，不承诺生成内容逐字可复现。
 
-源码或 skill 改变后应建立新实验。旧实验保留为历史证据；恢复需要匹配其 outer 的构建。复制实验目录不等同于迁移实验，因为冻结的 command 配置可能包含旧绝对路径；需要迁移的是正式导出 bundle。
+源码或 skill 改变后应建立新实验，包括从 0.2.0.dev0 升级到 dev1。旧实验保留为历史证据；恢复需要匹配其 outer 的构建。复制实验目录不等同于迁移实验，因为冻结的 command 配置可能包含旧绝对路径；需要迁移的是正式导出 bundle。
 
 ## 重跑发布验收
 
@@ -145,7 +151,7 @@ python3 scripts/search_smoke.py runs/search-comparison
 ```bash
 uv build --wheel
 python3 scripts/accept_release.py \
-  --wheel dist/autor_outer-0.2.0.dev0-py3-none-any.whl \
+  --wheel dist/autor_outer-0.2.0.dev1-py3-none-any.whl \
   --demo-strategy beam --output runs/acceptance-new
 ```
 
@@ -186,6 +192,35 @@ Harbor 的 inner 认证不同于宿主机 Codex 自动登录：默认使用 OPEN
 
 完成后查看 baseline-result.json 与 jobs/evaluation 下的逐题日志。任务异常或缺失会生成 failure.json，不给整轮伪造零分。先判断真实失败是否可分析，再创建 inner 比较实验；当前脚本不会自动启动搜索，也不会访问保留任务。镜像架构、npm 版本和模型可用性需要环境就绪后的 smoke 验证。
 
+### 当前本地 Lima 环境
+
+本机已在用户目录安装独立运行环境：Lima 2.2.1、Docker CLI 29.8.2、Docker daemon 29.9.1、Compose 5.6.0。VM 使用 VZ＋Rosetta，4 CPU、6 GiB 内存、48 GiB 磁盘上限。下载与 VM 文件位于 `~/.local/share/autor-runtime`；没有修改全局 Docker context 或 shell 启动文件。
+
+```bash
+source "$HOME/.local/share/autor-runtime/runtime.env"
+limactl start autor-tb
+docker info
+# 完成实验后释放 VM 内存：
+limactl stop autor-tb
+```
+
+本轮结束后已确认无残留容器并停止 VM，重新运行前先启动。共享目录仅限本次 pilot 工作区。内层容器不挂载宿主用户目录、仓库根目录或保留任务目录。上面 env 文件是这台机器的本地配置，不随公开仓库分发；另一台机器应使用自己的 Docker 环境。
+
+### 有界依赖安装与固定 Node 运行时
+
+第一次实际启动在 Debian 依赖安装阶段超时，未进入模型执行。为控制冷启动耗时，pilot 支持显式预置官方 Linux Node 发行目录；整个目录（含内部符号链接）计算摘要并只读挂载。准备前验证官方压缩包校验和；本机使用 Node v22.23.3 Linux x64、npm 10.9.9。
+
+```bash
+python3 scripts/terminal_bench_pilot.py prepare runs/tb-new \
+  --inner-model openai/gpt-6-astra --inner-version 0.153.4 \
+  --holdout-commitment '<独立清单的 SHA-256>' \
+  --bounded-apt --node-runtime '/path/to/node-v22.23.3-linux-x64'
+```
+
+`--bounded-apt` 固定 APT HTTP/HTTPS 超时为 15 秒、重试为 0。Node、APT 配置和 shell 启动文件均只读挂载并核对摘要；变更需新建实验。Harbor 按原逻辑安装其余依赖和 Codex；不改任务说明、模型、评分器或答案。容器用 `BASH_ENV` 引入 Node，避免设置 `PATH` 影响 Harbor 宿主侧 Docker 命令。共享 VM 时，新 pilot 目录及运行时必须位于明确挂载的目录内。
+
+这是记录在案的 pilot 运行条件，不等同于官方排行榜环境。每次启动应保留镜像 digest、架构、CLI 实际版本和依赖安装日志。失败运行保留原目录；只在确认未进入模型执行、定位问题后人工建立新的尝试，不重放不确定调用。
+
 ### 原有单轮 outer + Harbor 入口
 
 需要 Docker daemon 和可用模型凭据；下列参数由使用者明确填写，不默认选择模型或浮动版本。
@@ -200,7 +235,7 @@ uv run --python 3.12 --with harbor==0.24.0 autor doctor --run runs/harbor-smoke
 uv run --python 3.12 --with harbor==0.24.0 autor run runs/harbor-smoke
 ```
 
-预设使用 Terminal-Bench 2.0 的明确任务名，可重复 --task。默认 baseline 和一个后代，累计外部调用上限 900 秒。已有契约测试不等同于真实 Docker 验收。
+预设使用 Terminal-Bench 2.0 的明确任务名，可重复 --task。默认 baseline 和一个后代，累计外部调用上限 900 秒。四题 pilot 已实测通过；该单轮入口仍使用自己的固定预算，不能直接替代 pilot 配置。
 
 ## BOS / command 同步协议
 

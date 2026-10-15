@@ -6,18 +6,19 @@ Outer 由 Codex + `autor-research` skill 和一个 Python 控制器组成。模�
 
 ## 当前进展 · 2026-10-14
 
-v0.1.0 已冻结；当前开发版为 **0.2.0.dev0**，新增有界 **beam search**。默认宽度 2，每个父代尝试 2 个孩子，合成演示最多生成 6 个新候选。**尚未证明真实 harness 优化有效。**
+v0.1.0 已冻结；当前开发版为 **0.2.0.dev1**，新增有界 **beam search**。默认宽度 2，每个父代尝试 2 个孩子，合成演示最多生成 6 个新候选。**尚未证明真实 harness 优化有效。**
 
 | 当前能力 | 实际证据与边界 |
 |---|---|
 | 搜索组织 | hill_climb、branching、beam；完成一代后筛选，记录保留/淘汰/失败 |
-| 验证 | Python 3.12＋Harbor 0.24.0：50 项通过；Python 3.9：46 项通过、4 项依赖测试跳过；两个新 venv 的 beam 导出迁移通过 |
+| 验证 | Python 3.12＋Harbor 0.24.0：57 项通过；Python 3.9：53 项通过、4 项依赖测试跳过；两个新 venv 的 beam 导出迁移通过 |
+| Proposer 文件访问 | 仅开放暂存输入目录和系统运行库；启动前验证目录外读取、符号链接、写入及命令网络被拒绝；已通过真实 Codex canary 调用 |
 | 有界执行 | 次数与时间预算、部分代恢复、失败不重放、历史最佳独立于 frontier |
 | 搜索验证 | 三种策略各 6 次提案、7 次合成评测；验证低分分支可继续、分叉与淘汰，不代表真实效果 |
 | 历史真实闭环 | v0.1 的 HumanEval 失败反馈与两个新 venv 导出验收；人为错误 seed 的修复不是泛化证据 |
-| Terminal-Bench | 已准备 4 道搜索任务和 2 道保留任务；缺少 Docker，真实 baseline 与隔离验收仍未完成 |
+| Terminal-Bench | 四题真实 baseline 全部通过（4/4，均分 1.0，约 13 分 17 秒）；两道保留任务未测，真实候选搜索未启动 |
 
-最新凭证见 [搜索对照](docs/evidence/search-expansion.json)；冻结版本的真实实验见 [v0.1 验收](docs/evidence/v0.1.0.json) 和 [实际失败修复](docs/evidence/failure-feedback.patch)。原始日志与构建包保留在本地。
+最新凭证见 [Terminal-Bench baseline 与权限验证](docs/evidence/terminal-bench-pilot.json)，合成机制验证见 [搜索对照](docs/evidence/search-expansion.json)；冻结版本的真实实验见 [v0.1 验收](docs/evidence/v0.1.0.json) 和 [实际失败修复](docs/evidence/failure-feedback.patch)。原始日志与构建包保留在本地。
 
 ## 阅读入口
 
@@ -43,6 +44,6 @@ python3 -m venv .venv
 
 ## 接下来的真实实验
 
-搜索机制已可运行；真实实验仍先过 baseline 门槛：在可用容器环境测固定 4 题，确认存在可分析的自然失败，再比较少量 inner。2 道保留任务交由 outer 无法访问的独立评测端，候选冻结后再测。当前只完成清单准备，未完成该隔离或冻结门禁。
+本批四题 baseline 均通过，尚未观察到可分析的自然任务失败，当前样本没有分数提升空间。下一步先调整搜索任务，取得有区分度的反馈，再比较 baseline 与最多两个子代；暂未进行 Terminal-Bench 的真实候选搜索。
 
-本轮保持固定 outer、只改 inner 的 prompt。MCTS、多父代合并、并行评测与显式重复采样后置；先获得可信测量，再决定是否需要这些复杂度。
+两道保留任务不用于选题、选父或调 prompt。Proposer 的命令文件访问已受限；独立保留集评测服务和候选冻结门禁仍待实现。MCTS、多父代合并、并行评测与显式重复采样继续后置。

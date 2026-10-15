@@ -1,6 +1,6 @@
 # 当前实现与下一阶段方案
 
-更新：2026-10-14。当前开发版 0.2.0.dev0 已实现有界 beam search；v0.1.0 冻结交付保持原样。
+更新：2026-10-14。当前开发版 0.2.0.dev1 已实现有界 beam search；v0.1.0 冻结交付保持原样。
 
 ## 目标与职责
 
@@ -44,6 +44,7 @@ flowchart LR
 |---|---|
 | [cli.py](../autor/cli.py) | init、run、status、doctor、export 等命令 |
 | [engine.py](../autor/engine.py) | 循环、提案校验、候选状态和晋升 |
+| [permissions.py](../autor/permissions.py) | proposer 命令的工作目录读权限、关闭命令网络及启动前 canary 检查 |
 | [search.py](../autor/search.py) | 三种选父策略、beam 分代筛选与档案重建 |
 | [adapters.py](../autor/adapters.py) | Codex 提案、demo / command / Harbor 评测协议 |
 | [storage.py](../autor/storage.py) / [config.py](../autor/config.py) | 文件摘要、原子写入、锁、固定契约 |
@@ -69,6 +70,14 @@ flowchart LR
 调用前预留预算并落盘；失败也消耗次数。恢复只接纳确定落盘的完整结果，不自动重放不确定的收费调用。`--steps` 限制本次 CLI 会话新增提案数，不增加总预算。一次实验仅允许一个写入进程。
 
 `run.json` 保存配置、摘要、事件、候选、parents、得分和 best；候选目录保存 harness、proposal、diff、evaluation 与原始日志。`parents` 使用列表为后续合并预留结构，当前每个子代只有一个父代。
+
+## 已实现：proposer 的输入访问范围
+
+Codex 提案不再使用可广泛读取宿主文件的旧 `--sandbox read-only` 预设，而使用固定 permission profile：只读当前提案工作目录、系统最小运行库，以及 macOS 的 CommandLineTools。控制器在该目录暂存父代、搜索反馈、输出 schema 和请求文本。命令网络关闭，web search 关闭，自动 AGENTS.md 文档注入关闭，继续忽略用户 config 并禁止审批升级。
+
+每次模型调用前，控制器用相同权限执行 canary：工作输入可读；目录外文件、指向目录外的符号链接、写入和连接已监听的本地端口都必须失败。CLI 或平台不支持时直接停止，不退回宽松权限。探测不调用模型，时间计入提案上限；结果保存在 `proposal/isolation.json`。当前已在 macOS、Codex CLI 0.153.4 验证，并完成一次真实模型 canary 调用；Linux 尚未实机验收。
+
+这是 **proposer 本地命令的文件访问边界**，不是独立评测服务，也不限制受信任控制器、模型/认证服务流量或另行启用的 MCP、连接器、浏览器。保留任务及结果不能被控制器写入暂存输入；正式使用其他工具面前仍须验证各自的访问权限。候选冻结和独立保留集测量仍需后续实现。依据：[Codex 官方权限文档](https://learn.chatgpt.com/docs/permissions)。
 
 ## 已实现：测量和导出边界
 
@@ -101,11 +110,15 @@ v0.1 已完成真实失败反馈和同机新 venv 导出验收，详见 [验收�
 
 进入 inner 比较前的门槛：Docker/认证与模型可用；四题全部有有效测量；至少存在可分析的任务失败。超时、镜像构建或认证错误不能冒充零分。如果全通过，记录原结果并重新设计任务批次，不能人为破坏 seed 以制造“真实失败”。第一轮只比较 baseline 和最多两个子代；确认测量稳定后再用 beam 扩到最多六个新候选。
 
-两道保留任务已在本地单独预选，并对带随机盐的清单生成承诺摘要。公开配置只有摘要和数量。它们目前尚未评测；本地目录分开存储只是准备状态，**不是已完成的隔离**。正式搜索前，应把清单及任务交给 outer 无法访问的独立评测端：不挂载到 outer、不写入 prompt/skill/evidence/history、不让搜索日志引用它们。还需在任何 outer 启动前验证该访问边界。
+两道保留任务已在本地单独预选，并对带随机盐的清单生成承诺摘要。公开配置只有摘要和数量。它们目前尚未评测；本地目录分开存储本身不构成隔离；本轮另外实现了上文的 proposer 命令访问限制，并验证评测 VM 不挂载清单。独立保留集评测服务仍未实现。正式搜索前，应把清单及任务交给 outer 无法访问的独立评测端：不挂载到 outer、不写入 prompt/skill/evidence/history、不让搜索日志引用它们。还需在任何 outer 启动前验证该访问边界。
 
 搜索结束时先冻结候选摘要和选择理由，再在保留任务上同时测 baseline 与最终候选。结果只用于最终报告，不用于再选父、继续提案或在多个候选中择优。更改选择后要新建实验；2 道任务只能提供初步检查，不能支持显著性或广泛泛化结论。当前 pilot 只实现 baseline，未实现该独立评测服务或搜索冻结门禁。
 
-现阶段状态：配置与兼容性测试已通过；本机无 Docker，尚无 Terminal-Bench 实测成绩。模型服务与镜像可运行性也尚未通过真实容器验证。
+本机已接通 Lima/Docker，四题真实 baseline 完成：`fix-git`、`log-summary-date-ranges`、`nginx-request-logging`、`cancel-async-tasks` 均为 1.0。完整测量约 796.5 秒，四次 inner 运行、零次 proposer 调用，未评测保留任务。CLI 实际版本为 0.153.4，模型为 gpt-6-astra。
+
+运行环境为 macOS ARM 上的 VZ＋Rosetta，原始 amd64 镜像 digest 已记录；预置固定 Node 运行时，并限制 APT 下载超时。最初的依赖安装超时及 PATH 传播问题已单独留档，没有伪造零分或重放模型请求。详见 [当前凭证](evidence/terminal-bench-pilot.json)。
+
+本批暂未观察到自然任务失败，不能用满分 baseline 声称 harness 已优化。下一阶段应先调整搜索任务；获得可分析的失败并完成候选冻结/验证流程后，再比较少量子代。两道保留任务继续独立，不能根据其成绩来挑搜索题或修改 harness。
 
 ## 本轮验证与后续范围
 

@@ -1,6 +1,8 @@
 {
-  "status": "prepared_not_run",
+  "status": "completed",
   "date": "2026-10-14",
+  "outer_version": "0.2.0.dev1",
+  "outer_hash": "5d17b49e19d5d138aa0bbf4635444301f475bfd489993fc496ebf21c4c788249",
   "search_tasks": [
     "fix-git",
     "log-summary-date-ranges",
@@ -10,7 +12,8 @@
   "task_revision": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
   "heldout_count": 2,
   "holdout_commitment": "aef243d350225811b33ba4c4d934e527dfaf861f77b34c7e4f303aa0961ff605",
-  "holdout_isolation_status": "Locally curated only; independent evaluator isolation still required before running any proposer.",
+  "holdout_evaluated": false,
+  "holdout_isolation_status": "The VM does not mount the curator directory. Proposer local-command reads are restricted to staged inputs and verified with canaries. An independent heldout evaluation service and candidate-freeze gate remain unimplemented.",
   "limits": {
     "agent_seconds_per_task": 180,
     "total_seconds": 1200,
@@ -18,8 +21,8 @@
     "retries": 0,
     "proposer_calls": 0
   },
-  "preflight_with_existing_auth_file_opt_in": {
-    "ready": false,
+  "preflight": {
+    "ready": true,
     "checks": [
       {
         "check": "Harbor 0.24.0",
@@ -28,8 +31,13 @@
       },
       {
         "check": "Linux Docker daemon",
-        "ok": false,
-        "detail": "Executable unavailable"
+        "ok": true,
+        "detail": "Ready"
+      },
+      {
+        "check": "Docker Compose",
+        "ok": true,
+        "detail": "Ready"
       },
       {
         "check": "Harbor inner authentication configured",
@@ -38,11 +46,336 @@
       }
     ]
   },
-  "tests": {
-    "passed": 40,
-    "skipped": 0,
-    "harbor": "0.24.0"
+  "runtime": {
+    "lima": "limactl version 2.2.1",
+    "docker_client": "29.8.2",
+    "docker_server": "29.9.1",
+    "daemon_platform": "linux/arm64",
+    "compose": "5.6.0",
+    "vm_cpus": 4,
+    "vm_memory_gib": 6,
+    "vm_disk_gib": 48,
+    "virtualization": "vz",
+    "amd64_execution": "Rosetta",
+    "host_mount_scope": "Only this baseline pilot directory; not the repository, home, or curator directory",
+    "outer_isolation": "No proposer invoked; host-side outer access is not isolated by this VM mount policy",
+    "host_private_paths_probe": "denied_by_absence",
+    "vm_status_after_run": "Stopped"
   },
-  "measurement": null,
-  "note": "No Terminal-Bench model calls or benchmark scores yet. Authentication was checked for presence only."
+  "images": [
+    {
+      "task": "fix-git",
+      "image": "alexgshaw/fix-git:20251031",
+      "id": "sha256:61e431c00c58df652287aadce5457634d9f9330cfdd153ebdf2802df0d540119",
+      "digests": [
+        "alexgshaw/fix-git@sha256:61e431c00c58df652287aadce5457634d9f9330cfdd153ebdf2802df0d540119"
+      ],
+      "architecture": "amd64",
+      "os": "linux"
+    },
+    {
+      "task": "log-summary-date-ranges",
+      "image": "alexgshaw/log-summary-date-ranges:20251031",
+      "id": "sha256:cbeb6ba905c2fec294f16cd5e16e3ea7f2e04d38ac2484d51a11de262aa7dc51",
+      "digests": [
+        "alexgshaw/log-summary-date-ranges@sha256:cbeb6ba905c2fec294f16cd5e16e3ea7f2e04d38ac2484d51a11de262aa7dc51"
+      ],
+      "architecture": "amd64",
+      "os": "linux"
+    },
+    {
+      "task": "nginx-request-logging",
+      "image": "alexgshaw/nginx-request-logging:20251031",
+      "id": "sha256:693e64431a0dbf45952e8b91a298d54fd60247e501c6623fb8fa3ebc07fc3d3d",
+      "digests": [
+        "alexgshaw/nginx-request-logging@sha256:693e64431a0dbf45952e8b91a298d54fd60247e501c6623fb8fa3ebc07fc3d3d"
+      ],
+      "architecture": "amd64",
+      "os": "linux"
+    },
+    {
+      "task": "cancel-async-tasks",
+      "image": "alexgshaw/cancel-async-tasks:20251031",
+      "id": "sha256:84c7fae6b256dcc56a350790e2a9715eefc7dad662a9d8e8a472363aa71ef18d",
+      "digests": [
+        "alexgshaw/cancel-async-tasks@sha256:84c7fae6b256dcc56a350790e2a9715eefc7dad662a9d8e8a472363aa71ef18d"
+      ],
+      "architecture": "amd64",
+      "os": "linux"
+    }
+  ],
+  "runtime_overrides": {
+    "node": "v22.23.3 Linux x64",
+    "npm": "10.9.9",
+    "node_archive_url": "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.xz",
+    "node_archive_sha256": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de",
+    "artifact_digests": {
+      "runtime/apt-network.conf": "90bc7f6d1510ff85726f3aa12a4973793c53446361f591f1a357e0b055693a44",
+      "runtime/node": "e2fa079dfc3282755ca6d385bdbdc9f0a1784efd294a5475bc7d95f51c5959a9",
+      "runtime/node-profile.sh": "ad224dad5815a35b2f1c825ca2e05aec95a3c932d4557c171195a027a092cd44"
+    },
+    "apt": "HTTP/HTTPS timeout 15 seconds; retries 0",
+    "scope": "Read-only runtime mounts; original task instructions, model, prompt, verifier and image identities retained. Non-leaderboard pilot conditions."
+  },
+  "measurement": {
+    "synthetic": false,
+    "score": 1.0,
+    "passed_tasks": 4,
+    "total_tasks": 4,
+    "seconds": 796.531,
+    "inner_runs": 4,
+    "proposer_calls": 0,
+    "tasks": [
+      {
+        "task": "fix-git",
+        "score": 1.0,
+        "task_checksum": "7fa0a681f751d73f290d862522a82a5e448fa529834987ee1b80e5665c51aa7e",
+        "agent": {
+          "name": "codex",
+          "version": "0.153.4",
+          "model_info": {
+            "name": "gpt-6-astra",
+            "provider": "openai"
+          }
+        },
+        "seconds": {
+          "environment_setup": 0.842,
+          "agent_setup": 80.184,
+          "agent_execution": 58.22,
+          "verifier": 28.209
+        },
+        "usage": {
+          "n_input_tokens": 99030,
+          "n_cache_tokens": 73088,
+          "n_output_tokens": 742,
+          "cost_usd": 0.36960800000000005
+        },
+        "raw_trial_result_sha256": "668715d70e83a08a725eb21d19e25685dd64c37bb9f670383f2b07756d1aca3d"
+      },
+      {
+        "task": "log-summary-date-ranges",
+        "score": 1.0,
+        "task_checksum": "fe600befce59ff43dd85cb1db864652d4e6fa4706c6dd8a1d82118c1a76561ae",
+        "agent": {
+          "name": "codex",
+          "version": "0.153.4",
+          "model_info": {
+            "name": "gpt-6-astra",
+            "provider": "openai"
+          }
+        },
+        "seconds": {
+          "environment_setup": 0.867,
+          "agent_setup": 115.35,
+          "agent_execution": 43.16,
+          "verifier": 28.809
+        },
+        "usage": {
+          "n_input_tokens": 53609,
+          "n_cache_tokens": 45312,
+          "n_output_tokens": 638,
+          "cost_usd": 0.160182
+        },
+        "raw_trial_result_sha256": "cad8b057d59c9ff915cfb44fc5139a0bf30ed5c32bf030fee238c95a971a2d07"
+      },
+      {
+        "task": "nginx-request-logging",
+        "score": 1.0,
+        "task_checksum": "86a8bd681301002456da831adfae62fa7a538e8187d654e11335e92b81b0c2b3",
+        "agent": {
+          "name": "codex",
+          "version": "0.153.4",
+          "model_info": {
+            "name": "gpt-6-astra",
+            "provider": "openai"
+          }
+        },
+        "seconds": {
+          "environment_setup": 0.873,
+          "agent_setup": 73.186,
+          "agent_execution": 67.546,
+          "verifier": 33.199
+        },
+        "usage": {
+          "n_input_tokens": 113788,
+          "n_cache_tokens": 89344,
+          "n_output_tokens": 1377,
+          "cost_usd": 0.402634
+        },
+        "raw_trial_result_sha256": "9bf5a74d542775cf28ccfee3aaf78b50454fece678db6853853f5d56ec8ae153"
+      },
+      {
+        "task": "cancel-async-tasks",
+        "score": 1.0,
+        "task_checksum": "283c70ca90688dc09a969d24e3ed137ba0f00d23018df68771bdf86526b82047",
+        "agent": {
+          "name": "codex",
+          "version": "0.153.4",
+          "model_info": {
+            "name": "gpt-6-astra",
+            "provider": "openai"
+          }
+        },
+        "seconds": {
+          "environment_setup": 0.837,
+          "agent_setup": 107.876,
+          "agent_execution": 66.049,
+          "verifier": 39.13
+        },
+        "usage": {
+          "n_input_tokens": 59665,
+          "n_cache_tokens": 55168,
+          "n_output_tokens": 1559,
+          "cost_usd": 0.17808800000000002
+        },
+        "raw_trial_result_sha256": "eb02e67b3b5f45c8577440db3c867b850a516daeed9ed45829e8d1402840c924"
+      }
+    ],
+    "normalized_result_sha256": "56e3990abbdd35fc2a8f329b1eee367f8e7f7ec1e64153def98efabc5cdeb9c1"
+  },
+  "prior_startup_failures": [
+    {
+      "attempt": "initial",
+      "stage": "agent_setup",
+      "type": "AgentSetupTimeoutError",
+      "detail": "Dependency installation exceeded 360 seconds. The next trial was cancelled during setup. No inner execution observed; no aggregate score assigned."
+    },
+    {
+      "attempt": "retry-003",
+      "stage": "environment_start",
+      "type": "FileNotFoundError",
+      "detail": "A container PATH override affected the host Docker client lookup. Replaced with a BASH_ENV startup hook. No inner execution and no aggregate score."
+    }
+  ],
+  "permission_boundary": {
+    "local_checks": {
+      "profile": "autor-proposal",
+      "checks": {
+        "input_readable": true,
+        "outside_denied": true,
+        "symlink_escape_denied": true,
+        "write_denied": true,
+        "command_network_denied": true
+      },
+      "model_calls": 0,
+      "scope": "Local sandboxed commands only. Controller and model/authentication service traffic are outside this boundary."
+    },
+    "live_integration": {
+      "model": "gpt-6-astra",
+      "model_calls": 1,
+      "purpose": "Permission integration check on synthetic canaries, not a benchmark or harness optimization experiment",
+      "outer_hash": "5d17b49e19d5d138aa0bbf4635444301f475bfd489993fc496ebf21c4c788249",
+      "seconds": 21.495322624919936,
+      "response": {
+        "inside": "VISIBLE_CANARY",
+        "outside": "denied",
+        "symlink": "denied"
+      },
+      "usage": {
+        "completed": true,
+        "input_tokens": 23516,
+        "cached_input_tokens": 11520,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 109,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "raw_live_receipt_sha256": "5a3c1b3afacd840134ca980a2183838adfe7e53222e9567956bafcc27b4f5e58",
+    "limitations": "Local command scope only; trusted controller and separately enabled MCP, connectors, browsers and model/authentication service traffic need their own controls. Native macOS validated; Linux not yet validated."
+  },
+  "tests": [
+    {
+      "environment": "Python 3.12.13 + Harbor 0.24.0",
+      "discovered": 57,
+      "passed": 57,
+      "skipped": 0,
+      "failures": 0,
+      "log_sha256": "63c299a076abbe29395f25a016989eeceb7c7fe4a90611a384069b7001701b38"
+    },
+    {
+      "environment": "Python 3.9.6",
+      "discovered": 57,
+      "passed": 53,
+      "skipped": 4,
+      "failures": 0,
+      "log_sha256": "6bd64098067f5cfe8f0a09f901c37d9f390ab3b3e2c6e69539bcf907bc5cd15e"
+    }
+  ],
+  "fresh_install": {
+    "status": "passed",
+    "wheel": "autor_outer-0.2.0.dev1-py3-none-any.whl",
+    "wheel_sha256": "b7f7989f00109542caa669695e5b6910bafdff540bc9a5f364cfe31abc327ff1",
+    "environments": 2,
+    "producer_environment_removed": true,
+    "synthetic_loop": {
+      "strategy": "beam",
+      "synthetic": true,
+      "proposals": 6,
+      "evaluations": 5,
+      "search": {
+        "beam_width": 2,
+        "children_per_parent": 2,
+        "rounds": [
+          {
+            "generation": 1,
+            "parents": [
+              "c0000"
+            ],
+            "children": [
+              "c0001",
+              "c0002"
+            ],
+            "slots": 2,
+            "complete": true,
+            "selected": [
+              "c0001",
+              "c0002"
+            ],
+            "pruned": [],
+            "failed": []
+          },
+          {
+            "generation": 2,
+            "parents": [
+              "c0001",
+              "c0002"
+            ],
+            "children": [
+              "c0003",
+              "c0004",
+              "c0005",
+              "c0006"
+            ],
+            "slots": 4,
+            "complete": true,
+            "selected": [
+              "c0003",
+              "c0004"
+            ],
+            "pruned": [],
+            "failed": [
+              "c0005",
+              "c0006"
+            ]
+          }
+        ],
+        "frontier": [
+          "c0003",
+          "c0004"
+        ],
+        "next_parent": "c0003",
+        "exhausted": false
+      }
+    },
+    "raw_receipt_sha256": "b0e0ff8a9854ec4a229beb77ca14a29a7e0bdc47f27958a2b99f84e9bb825764"
+  },
+  "cleanup": {
+    "remaining_containers": 0,
+    "image_ids_unchanged": true
+  },
+  "next_gate": {
+    "natural_task_failures_observed": 0,
+    "candidate_search_started": false,
+    "reason": "All four baseline tasks passed once. Select more discriminating search tasks before comparing candidate harnesses. These scores do not demonstrate harness optimization or heldout generalization."
+  }
 }
