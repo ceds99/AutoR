@@ -11,7 +11,8 @@ AutoR 是固定的 outer：接收 inner seed，调用 proposer，校验文件修
 | 核心与合成演示 | Python 3.9+，macOS/Linux | macOS 两个独立 Python 3.12 虚拟环境 |
 | 本地真实 HumanEval | macOS、sandbox-exec、系统 Python、可用且已认证的 Codex CLI | 真实模型调用、原始测试、导出迁移后重新调用 |
 | Harbor | Python 3.12+、Harbor 0.24.0、Docker daemon、模型凭据 | 四题真实 Docker baseline 全通过；ARM＋Rosetta，固定短预算，未执行保留集 |
-| 自定义 BOS / command | 已实现同步 JSON 协议的外部命令 | 协议测试；外部服务由使用者提供 |
+| BOS 资源预检 | Python 3.9+、明确服务 URL、内网连通 | 只读 HTTP；本地契约测试通过，真实入口连接超时 |
+| 自定义 BOS / command | 另行实现候选发布与同步 JSON wrapper | 通用协议可用，BOS evaluator 尚未实现 |
 
 从 GitHub 获取当前源码并安装：
 
@@ -237,7 +238,26 @@ uv run --python 3.12 --with harbor==0.24.0 autor run runs/harbor-smoke
 
 预设使用 Terminal-Bench 2.0 的明确任务名，可重复 --task。默认 baseline 和一个后代，累计外部调用上限 900 秒。四题 pilot 已实测通过；该单轮入口仍使用自己的固定预算，不能直接替代 pilot 配置。
 
-## BOS / command 同步协议
+## BOS 接入预检
+
+用户提供的 `bos-exec` 包说明更新于 2026-10-14。完整附件保留在本地；不将团队内部资料和私有服务地址复制进公开仓库。优先使用目标部署的现有 CaseVersion、Profile 和 Release，不改平台 execution-defaults。
+
+在仓库根目录运行，服务 URL 显式来自当前部署配置：
+
+```bash
+python3 scripts/bos_preflight.py runs/bos-preflight-001 \
+  --base-url "$BOS_BASE_URL" --timeout 5 --budget 45
+```
+
+脚本直连 BOS，不改变全局代理；只发送 GET，记录健康检查、版本、OpenAPI、默认 Profile/Harness 及 AgentRelease 候选。首次不自动选择行为包，也不枚举 Case，避免把保留任务清单带进搜索上下文。后续可以加 `--agent-release-ref agent_releases/<id>` 与至多六个 `--case-version-ref case_versions/<id>`，仅检查明确的搜索任务。
+
+输出目录必须全新，包含 input.json、原始 response-NNN.json、requests.json 和 report.json。`status=discovered` 只表示完成资源读取，`evaluation_ready` 始终为 false；非就绪资源和后续接入缺口仍在 `missing` 中。连接/响应错误返回退出码 2，成功读取返回 0。默认单次 socket 超时 5 秒，发现阶段在请求之间检查 45 秒预算；这不是独立进程的硬墙钟截止器。
+
+原始响应可能含私有 Profile 元数据，留在受忽略的 runs/，不要全部复制到 proposer 输入或公开仓库。网络恢复后应新建预检目录，保留已有失败证据。
+
+2026-10-15 已分别尝试附件原始客户端、直连 HTTP、默认代理路径与 TCP 端口检查，均未连通文档入口；尚未获得 OpenAPI、Run/Trial 或分数。原文明确该入口依赖公司内网/VPN、端口转发由服务端维护。本轮无法区分路由、防火墙或服务监听问题，不能判断为认证失败。恢复访问后先重做预检，再落实候选包发布合同，见 [当前接入方案](design.md#下一阶段bos-接入搜索质量与工程化) 和 [凭证](evidence/bos-integration.json)。
+
+## BOS / command 同步协议（wrapper 待实现）
 
 配置中的 evaluator 可以接外部 wrapper：
 

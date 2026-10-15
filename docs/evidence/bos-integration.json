@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-15T07:31:45.802663+00:00",
+  "status": "blocked_before_bos_api_connection",
+  "core_version": "0.2.0.dev1",
+  "outer_fingerprint": "5d17b49e19d5d138aa0bbf4635444301f475bfd489993fc496ebf21c4c788249",
+  "scope": "Read-only BOS discovery and staged roadmap; no BOS evaluator or candidate publisher implemented.",
+  "attachment_review": {
+    "archives": [
+      {
+        "name": "bos-exec.zip",
+        "sha256": "d84fd8635048e85a5df632c5c991f65ee2f9e0685ac71e0991b6debe5aae3c6a",
+        "manifest_files_verified": 4,
+        "published_on": "2026-10-14"
+      },
+      {
+        "name": "bos-skills.zip",
+        "sha256": "c2e7d4976dcbca5e70154c2f5380bc320c0ee12d1f26e441e3309b71bad301af",
+        "manifest_files_verified": 76,
+        "published_on": "2026-10-14"
+      },
+      {
+        "name": "create-task.zip",
+        "sha256": "910e1cc5c574e0eb8d3d3194f0ed8c327acaaf0aaf28a65541a2e5da009a55f7",
+        "manifest_files_verified": 4,
+        "published_on": "2026-10-14"
+      },
+      {
+        "name": "eval-engineering.zip",
+        "sha256": "be45acd82f1842baf86efb01e97156c16e6448c7cb64c854de1d5bcb17128b1a",
+        "manifest_files_verified": 23,
+        "published_on": "2026-10-14"
+      },
+      {
+        "name": "rewardkit.zip",
+        "sha256": "29a717d2b41111daa12a138ec39d30e99297cda9a4d1523ccd5ea81bc33f6648",
+        "manifest_files_verified": 4,
+        "published_on": "2026-10-14"
+      },
+      {
+        "name": "task-atlas-library.zip",
+        "sha256": "d976a5b9f09f6c78a1ab61a7ca7d7aa863803ce7b80687ad20c16e721a376b0e",
+        "manifest_files_verified": 41,
+        "published_on": "2026-10-14"
+      }
+    ],
+    "independent_packages_match_collection": true,
+    "service_endpoints_found": 1,
+    "alternate_endpoint_found": false,
+    "candidate_package_publishing_contract_in_attachments": false,
+    "notes": "Reviewed entry skills, BOS-specific references, Harbor/discovery references and complete bos_client.py. Other files inventoried/searched; vendor viewer code is not part of execution integration."
+  },
+  "live_checks": {
+    "target": "Private deployment origin documented in the supplied skill; address retained locally.",
+    "preflight": {
+      "schema_version": 1,
+      "status": "blocked",
+      "evaluation_ready": false,
+      "remote_writes": 0,
+      "model_calls": 0,
+      "error": "URLError at /health/ready",
+      "request_count": 1,
+      "script_sha256": "2dd2924ce98374b2714f5e7546071b48bfe3c9c20563df8887356cef87d2e0e2"
+    },
+    "network": [
+      {
+        "check": "bos-direct",
+        "exit_code": 28,
+        "http_status": "000",
+        "elapsed_seconds": 3.02,
+        "outcome": "connection_timeout"
+      },
+      {
+        "check": "bos-default-proxy",
+        "exit_code": 28,
+        "http_status": "000",
+        "elapsed_seconds": 3.025,
+        "outcome": "connection_timeout"
+      },
+      {
+        "check": "tcp",
+        "exit_code": 1,
+        "http_status": null,
+        "elapsed_seconds": 3.017,
+        "outcome": "connection_timeout"
+      },
+      {
+        "check": "bos-schema-source",
+        "exit_code": 28,
+        "http_status": "000",
+        "elapsed_seconds": 3.024,
+        "outcome": "connection_timeout"
+      }
+    ],
+    "supplied_client": {
+      "status": "client_process_timeout",
+      "timeout_seconds": 8,
+      "command": "unmodified bos-exec client defaults",
+      "proxy_bypassed_for_bos": true,
+      "remote_writes": 0,
+      "elapsed_seconds": 8.005
+    },
+    "interpretation": "No HTTP response obtained. Could not distinguish network route, firewall or service availability. Authentication and deployment schema have not been tested."
+  },
+  "tests": {
+    "python312_harbor024": {
+      "tests": 67,
+      "passed": 67,
+      "log_sha256": "0025b5db67c78bc07a10616420b50435d1dca9f9e15720704023ed13d43c388c"
+    },
+    "python39_bos_preflight": {
+      "tests": 10,
+      "passed": 10,
+      "log_sha256": "553489508b7a6b748a549ed6a9d3cfd07f6986fefe422f3b8fc1b381d1160626"
+    },
+    "scope": "Local loopback HTTP fixtures: read-only resource discovery, explicit refs, no case enumeration, identity mismatch, inactive resources, pagination loop, malformed response, failure receipts, evidence preservation, explicit URL/budget. Not a BOS deployment acceptance."
+  },
+  "actual_execution": {
+    "bos_evaluation_runs": 0,
+    "model_calls": 0,
+    "remote_mutations": 0,
+    "candidate_releases_published": 0,
+    "scores": null,
+    "heldout_tasks_accessed": false
+  },
+  "local_receipts": [
+    {
+      "name": "attachment-review.json",
+      "sha256": "e0daacd3d381d079197d67ec99400e3095dc9e03812e2296b480951fe02a643d"
+    },
+    {
+      "name": "network-checks.json",
+      "sha256": "13147ea8e826fe28ef794ccd379f95e002233a1d6db650f7f41cd4e963a86f13"
+    },
+    {
+      "name": "skill-client-attempt.json",
+      "sha256": "116322d179fdefbd78c8d00726eb16c5629b1db064b63651620f73149dbfa89f"
+    },
+    {
+      "name": "preflight-final/input.json",
+      "sha256": "a0235a879c8fd7fa5862bfec0fc2dc1ef6dcd246e88ba482a61c98b35cd16304"
+    },
+    {
+      "name": "preflight-final/requests.json",
+      "sha256": "04fd53d9c045dc1b3704b03e4b2590467bd0220dcfceb64b34da43b1b53736b2"
+    },
+    {
+      "name": "preflight-final/report.json",
+      "sha256": "e0b0fd6fcc77161b1feb94a4c3f956743d54f231ae9f85745ec75f9499a64060"
+    }
+  ],
+  "next_gates": [
+    "Restore connectivity to the intended BOS deployment and fetch live OpenAPI.",
+    "Verify fixed resources and storage access; select the actual inner runtime without silently replacing Codex.",
+    "Implement candidate publication with immutable digest and runtime activation evidence.",
+    "Complete one bounded full trial, then baseline plus one child through AutoR; collect valid per-task feedback and verify cleanup/recovery."
+  ],
+  "privacy": "Supplied archives, private endpoints, raw service responses and local paths are excluded from this public summary."
+}
