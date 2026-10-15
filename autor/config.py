@@ -15,8 +15,16 @@ def validate(config):
         raise AutorError("config.schema_version must be 1")
     if not isinstance(config.get("objective"), str) or not config["objective"].strip():
         raise AutorError("An objective is required")
-    if config.get("strategy") not in ("hill_climb", "branching"):
-        raise AutorError("strategy must be hill_climb or branching")
+    if config.get("strategy") not in ("hill_climb", "branching", "beam"):
+        raise AutorError("strategy must be hill_climb, branching or beam")
+    search = config.get("search", {})
+    if not isinstance(search, dict) or set(search) - {"beam_width", "children_per_parent"}:
+        raise AutorError("search accepts only beam_width and children_per_parent")
+    if search and config["strategy"] != "beam":
+        raise AutorError("search settings require strategy beam")
+    for key, value in search.items():
+        if type(value) is not int or not 1 <= value <= 8:
+            raise AutorError("search." + key + " must be an integer from 1 to 8")
     allowed = config.get("editable_files")
     if not isinstance(allowed, list) or not allowed or len(set(allowed)) != len(allowed):
         raise AutorError("editable_files must be a nonempty list of unique exact paths")

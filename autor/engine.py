@@ -8,6 +8,7 @@ import time
 from . import __version__
 from . import adapters
 from .config import validate, validate_harness
+from .search import beam_view, select_parent
 from .storage import (AutorError, copy_harness, digest, locked, manifest,
                       outer_fingerprint, read_json, safe_relative, write_json)
 
@@ -39,6 +40,8 @@ def initialize(root, seed, config):
                         "hash": digest(files), "hypothesis": "Imported seed; MA is outside this run"}],
         "events": [],
     }
+    if config["strategy"] == "beam":
+        state["search"] = beam_view(state)
     write_json(root / "run.json", state)
     return state
 
@@ -56,19 +59,6 @@ def load(root, verify_outer=True):
             if digest(manifest(root / "candidates" / item["id"] / "harness")) != item["hash"]:
                 raise AutorError("Harness snapshot was modified: " + item["id"])
     return state
-
-
-def select_parent(state):
-    items = [c for c in state["candidates"] if c["status"] == "evaluated"]
-    if not items:
-        raise AutorError("No measured parent is available")
-    if state["config"]["strategy"] == "hill_climb":
-        return next(c for c in items if c["id"] == state["best"])
-    # Bounded breadth-first expansion: two children per measured candidate.
-    # Lower-scoring parents remain eligible. Merging is deliberately deferred.
-    counts = {c["id"]: sum(c["id"] in x["parents"] for x in state["candidates"]) for c in items}
-    available = [c for c in items if counts[c["id"]] < 2] or items
-    return min(available, key=lambda c: (c["depth"], counts[c["id"]], -c["score"], c["id"]))
 
 
 def apply_proposal(config, parent, child, proposal):
@@ -112,6 +102,8 @@ class Experiment:
         self.notify = notify or (lambda event: None)
 
     def save(self):
+        if self.state["config"]["strategy"] == "beam":
+            self.state["search"] = beam_view(self.state)
         write_json(self.root / "run.json", self.state)
 
     def event(self, kind, **data):
@@ -217,8 +209,8 @@ class Experiment:
             candidate.update(status="error", error=str(e))
             self.event("evaluation_failed", candidate=candidate["id"], error=str(e))
 
-    def propose(self):
-        parent = select_parent(self.state)
+    def propose(self, parent=None):
+        parent = parent or select_parent(self.state)
         candidate = {"id": "c{:04d}".format(len(self.state["candidates"])),
                      "parents": [parent["id"]], "depth": parent["depth"] + 1, "status": "proposing"}
         self.state["candidates"].append(candidate)
@@ -290,7 +282,11 @@ class Experiment:
                     if self.state["evaluations_used"] >= budget["max_evaluations"]:
                         reason = "evaluation_budget"
                         break
-                    self.propose()
+                    parent = select_parent(self.state)
+                    if parent is None:
+                        reason = "search_exhausted"
+                        break
+                    self.propose(parent)
             except KeyboardInterrupt:
                 self.recover()
                 reason = "interrupted"

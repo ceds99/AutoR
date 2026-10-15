@@ -1,0 +1,429 @@
+{
+  "version": "0.2.0.dev0",
+  "date": "2026-10-14",
+  "scope": "Synthetic search mechanics and same-host fresh-venv portability only. No new model calls or Terminal-Bench measurements.",
+  "tests": [
+    {
+      "environment": "Python 3.12.13 + Harbor 0.24.0",
+      "discovered": 50,
+      "passed": 50,
+      "skipped": 0,
+      "failures": 0,
+      "log_sha256": "d0b33f543063ac2ad00a654b46ac2e6ac45302a27d7f59f22f64546fd2bfd82f"
+    },
+    {
+      "environment": "Python 3.9.6 (core)",
+      "discovered": 50,
+      "passed": 46,
+      "skipped": 4,
+      "failures": 0,
+      "log_sha256": "4d297f033766cdcfa6fb8a4d3a4a18c2c4891ec8a82e024acdfc79b4f742435f"
+    }
+  ],
+  "comparison": {
+    "synthetic": true,
+    "model_calls": 0,
+    "purpose": "Controller/search verification only; no optimization or generalization claim.",
+    "fixture_sha256": "31654bb52fdc96cd0ef16418c080377dc1fd0b96ea1684ae2b4469a81a13ac9c",
+    "outer_hash": "d4d1630da2912bbb1bbf9917b022223d025898e51721c7c7b034db9fbfbe8960",
+    "results": {
+      "hill_climb": {
+        "best": "c0003",
+        "stop_reason": "proposal_budget",
+        "strategy": "hill_climb",
+        "synthetic": true,
+        "budget": {
+          "proposals_used": 6,
+          "evaluations_used": 7,
+          "seconds_used": 0.0005804989486932755
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.5
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.7
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.72
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.74
+          },
+          {
+            "id": "c0004",
+            "parents": [
+              "c0003"
+            ],
+            "status": "evaluated",
+            "score": 0.74
+          },
+          {
+            "id": "c0005",
+            "parents": [
+              "c0003"
+            ],
+            "status": "evaluated",
+            "score": 0.74
+          },
+          {
+            "id": "c0006",
+            "parents": [
+              "c0003"
+            ],
+            "status": "evaluated",
+            "score": 0.74
+          }
+        ]
+      },
+      "branching": {
+        "best": "c0006",
+        "stop_reason": "proposal_budget",
+        "strategy": "branching",
+        "synthetic": true,
+        "budget": {
+          "proposals_used": 6,
+          "evaluations_used": 7,
+          "seconds_used": 0.0005563752492889762
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.5
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.7
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.4
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.72
+          },
+          {
+            "id": "c0004",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.9
+          },
+          {
+            "id": "c0005",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.73
+          },
+          {
+            "id": "c0006",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 1.0
+          }
+        ]
+      },
+      "beam": {
+        "best": "c0006",
+        "stop_reason": "proposal_budget",
+        "strategy": "beam",
+        "synthetic": true,
+        "search": {
+          "beam_width": 2,
+          "children_per_parent": 2,
+          "rounds": [
+            {
+              "generation": 1,
+              "parents": [
+                "c0000"
+              ],
+              "children": [
+                "c0001",
+                "c0002"
+              ],
+              "slots": 2,
+              "complete": true,
+              "selected": [
+                "c0001",
+                "c0002"
+              ],
+              "pruned": [],
+              "failed": []
+            },
+            {
+              "generation": 2,
+              "parents": [
+                "c0001",
+                "c0002"
+              ],
+              "children": [
+                "c0003",
+                "c0004",
+                "c0005",
+                "c0006"
+              ],
+              "slots": 4,
+              "complete": true,
+              "selected": [
+                "c0006",
+                "c0004"
+              ],
+              "pruned": [
+                "c0005",
+                "c0003"
+              ],
+              "failed": []
+            }
+          ],
+          "frontier": [
+            "c0006",
+            "c0004"
+          ],
+          "next_parent": "c0006",
+          "exhausted": false
+        },
+        "budget": {
+          "proposals_used": 6,
+          "evaluations_used": 7,
+          "seconds_used": 0.0005190849769860506
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.5
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.7
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.4
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.72
+          },
+          {
+            "id": "c0004",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.9
+          },
+          {
+            "id": "c0005",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.73
+          },
+          {
+            "id": "c0006",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 1.0
+          }
+        ]
+      }
+    }
+  },
+  "fresh_install": {
+    "status": "passed",
+    "wheel": "autor_outer-0.2.0.dev0-py3-none-any.whl",
+    "wheel_sha256": "6a95163e1373f683cfa30ea7ca26584a4bbc40aa9ac61bf7a9010f513a40500a",
+    "raw_receipt_sha256": "78cfcf22af2193c76c3f9ed955fd5a2260cb6647dfd7bb270cc5556a2222bccc",
+    "environments": 2,
+    "producer_environment_removed": true,
+    "synthetic_loop": {
+      "strategy": "beam",
+      "synthetic": true,
+      "proposals": 6,
+      "evaluations": 5,
+      "search": {
+        "beam_width": 2,
+        "children_per_parent": 2,
+        "rounds": [
+          {
+            "generation": 1,
+            "parents": [
+              "c0000"
+            ],
+            "children": [
+              "c0001",
+              "c0002"
+            ],
+            "slots": 2,
+            "complete": true,
+            "selected": [
+              "c0001",
+              "c0002"
+            ],
+            "pruned": [],
+            "failed": []
+          },
+          {
+            "generation": 2,
+            "parents": [
+              "c0001",
+              "c0002"
+            ],
+            "children": [
+              "c0003",
+              "c0004",
+              "c0005",
+              "c0006"
+            ],
+            "slots": 4,
+            "complete": true,
+            "selected": [
+              "c0003",
+              "c0004"
+            ],
+            "pruned": [],
+            "failed": [
+              "c0005",
+              "c0006"
+            ]
+          }
+        ],
+        "frontier": [
+          "c0003",
+          "c0004"
+        ],
+        "next_parent": "c0003",
+        "exhausted": false
+      }
+    },
+    "checks": [
+      {
+        "step": "venv-a",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "install-a",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "import-a",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "venv-b",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "install-b",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "import-b",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "demo",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "demo-resume",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "demo-export",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "moved-demo-verify",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "moved-demo-run",
+        "exit_code": 0,
+        "expected_exit": 0
+      },
+      {
+        "step": "moved-demo-no-replay",
+        "exit_code": 1,
+        "expected_exit": 1
+      },
+      {
+        "step": "tamper-rejected",
+        "exit_code": 1,
+        "expected_exit": 1
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic scores are assigned by fixture; they are not real improvement evidence.",
+    "Six-proposal fixture visits the same tree for branching and beam; no evidence of beam superiority.",
+    "No real Terminal-Bench run: Docker environment remains unavailable.",
+    "Held-out access isolation and final-candidate freeze gate remain unimplemented.",
+    "v0.1 frozen artifacts are unchanged; this build cannot resume v0.1 experiments."
+  ]
+}

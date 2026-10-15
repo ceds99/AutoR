@@ -20,12 +20,13 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--wheel", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--demo-strategy", choices=["branching", "beam"], default="branching")
     p.add_argument("--real-model")
     p.add_argument("--seed-prompt", type=Path)
     args = p.parse_args()
     wheel, output = args.wheel.resolve(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    root = Path(tempfile.mkdtemp(prefix="autor-v01-acceptance-")).resolve()
+    root = Path(tempfile.mkdtemp(prefix="autor-acceptance-")).resolve()
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.pop("PYTHONHOME", None)
@@ -72,10 +73,18 @@ def main():
         a, b = root / "a/bin/autor", root / "b/bin/autor"
         source = root / "source"
         source.mkdir()
-        command("demo", [a, "demo", source / "demo"], source)
+        command("demo", [a, "demo", source / "demo", "--strategy", args.demo_strategy], source)
         command("demo-resume", [a, "run", source / "demo"], source)
         state = json.loads((source / "demo/run.json").read_text())
-        assert state["proposals_used"] == 3 and state["evaluations_used"] == 4
+        expected_calls = (6, 5) if args.demo_strategy == "beam" else (3, 4)
+        assert (state["proposals_used"], state["evaluations_used"]) == expected_calls
+        if args.demo_strategy == "beam":
+            assert len(state["search"]["rounds"]) == 2
+            assert all(r["complete"] for r in state["search"]["rounds"])
+            assert sum(c["status"] == "rejected" for c in state["candidates"]) == 2
+        receipt["synthetic_loop"] = {"strategy": args.demo_strategy, "synthetic": True,
+                                     "proposals": state["proposals_used"], "evaluations": state["evaluations_used"],
+                                     "search": state.get("search")}
         command("demo-export", [a, "export", source / "demo", source / "demo-export"], source)
         shutil.copytree(source / "demo-export", root / "moved-demo")
         if args.real_model:

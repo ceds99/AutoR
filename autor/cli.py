@@ -26,6 +26,7 @@ def summary(state):
     return {"best": state["best"], "stop_reason": state["stop_reason"],
             "strategy": state["config"]["strategy"],
             "synthetic": state["config"]["evaluator"]["kind"] == "demo",
+            **({"search": engine.beam_view(state)} if state["config"]["strategy"] == "beam" else {}),
             "budget": {k: state[k] for k in ("proposals_used", "evaluations_used", "seconds_used")},
             "candidates": [{k: c[k] for k in ("id", "parents", "status", "score", "error") if k in c}
                            for c in state["candidates"]]}
@@ -45,8 +46,10 @@ def parser():
     sub = p.add_subparsers(dest="command", required=True)
     demo = sub.add_parser("demo", help="Run a synthetic fixture without model calls or Docker")
     demo.add_argument("run", type=Path)
-    demo.add_argument("--strategy", choices=["hill_climb", "branching"], default="branching")
-    demo.add_argument("--proposals", type=nonnegative, default=3)
+    demo.add_argument("--strategy", choices=["hill_climb", "branching", "beam"], default="branching")
+    demo.add_argument("--proposals", type=nonnegative, help="Defaults to 6 for beam, 3 otherwise")
+    demo.add_argument("--beam-width", type=nonnegative)
+    demo.add_argument("--children-per-parent", type=nonnegative)
     init = sub.add_parser("init", help="Import an existing seed and freeze a JSON experiment config")
     init.add_argument("run", type=Path)
     init.add_argument("--seed", type=Path, required=True)
@@ -57,7 +60,7 @@ def parser():
     harbor.add_argument("--inner-model", required=True)
     harbor.add_argument("--inner-version", required=True, help="Exact npm @openai/codex version")
     harbor.add_argument("--task", action="append", required=True, help="Exact Terminal-Bench 2.0 task name")
-    harbor.add_argument("--strategy", choices=["hill_climb", "branching"], default="branching")
+    harbor.add_argument("--strategy", choices=["hill_climb", "branching", "beam"], default="branching")
     human = sub.add_parser("init-humaneval", help="Prepare a real local macOS smoke experiment using pinned HumanEval tasks")
     human.add_argument("run", type=Path)
     human.add_argument("--model", required=True, help="Explicit Codex model for both outer and inner")
@@ -88,7 +91,12 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         if args.command == "demo":
-            initialize_preset(args.run, demo_config(args.strategy, args.proposals))
+            proposals = args.proposals if args.proposals is not None else (6 if args.strategy == "beam" else 3)
+            config = demo_config(args.strategy, proposals)
+            settings = {k: getattr(args, k) for k in ("beam_width", "children_per_parent") if getattr(args, k) is not None}
+            if settings:
+                config["search"] = settings
+            initialize_preset(args.run, config)
             state = engine.Experiment(args.run, output).run()
             output(summary(state))
             return 0 if state["best"] is not None else 1

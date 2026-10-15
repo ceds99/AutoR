@@ -20,6 +20,19 @@ def write_report(root, state):
     for c in state["candidates"]:
         lines.append("| {} | {} | {} | {} | {} |".format(c["id"], ", ".join(c["parents"]) or "seed",
                      c["status"], c.get("score", "—"), c.get("promoted", False)))
+    if config["strategy"] == "beam":
+        from .search import beam_view
+        view = beam_view(state)
+        lines += ["", "## Beam 搜索", "",
+                  "每代全部名额完成后才筛选；失败占用名额；淘汰只影响后续选父，历史最佳仍可导出。", "",
+                  "- 当前 frontier：" + (", ".join(view["frontier"]) or "空"),
+                  "- 搜索耗尽：" + str(view["exhausted"]), "",
+                  "| 代 | 父代 | 已用/总名额 | 完成 | 保留 | 淘汰 | 失败 |",
+                  "|---|---|---|---|---|---|---|"]
+        for r in view["rounds"]:
+            lines.append("| {} | {} | {}/{} | {} | {} | {} | {} |".format(
+                r["generation"], ", ".join(r["parents"]), len(r["children"]), r["slots"], r["complete"],
+                ", ".join(r["selected"]) or "—", ", ".join(r["pruned"]) or "—", ", ".join(r["failed"]) or "—"))
     for c in state["candidates"]:
         lines += ["", "## " + c["id"], "", "假设：" + c.get("hypothesis", "尚未生成")]
         for label, key in (("诊断", "diagnosis"), ("失败原因", "error")):

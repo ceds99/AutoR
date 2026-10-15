@@ -1,4 +1,6 @@
-# v0.1 运行与交付手册
+# 当前运行与交付手册
+
+当前开发版：0.2.0.dev0。冻结 v0.1.0 包用于重现历史实验；升级源码后请创建新实验，旧实验需使用匹配构建恢复。
 
 AutoR 是固定的 outer：接收 inner seed，调用 proposer，校验文件修改，测量候选，保存血缘并导出。MA 不在本版运行链路内。首版真实预设只允许改 `prompt.md`，不修改模型、评测器或预算。
 
@@ -45,6 +47,33 @@ python3 -m venv .venv
 恢复不重置预算，也不重新测量已完成候选。演示只按提示中的字符串打分，明确标记 synthetic，不代表真实 agent 能力。
 
 `verify-export` 不发模型请求。它检查文件集合、摘要、候选来源和当前 outer 兼容性；它不是数字签名，也不提供第三方身份认证。
+
+## 有界 beam 搜索
+
+```bash
+.venv/bin/autor demo runs/beam --strategy beam --beam-width 2 --children-per-parent 2 --proposals 6
+.venv/bin/autor status runs/beam
+python3 scripts/search_smoke.py runs/search-comparison
+```
+
+第一条使用普通字符串 demo，会出现重复提示被拒绝，拒绝仍消耗提案名额。对照脚本用专门的合成树分别跑 hill_climb、branching、beam，各 6 次提案和 7 次有效评测，并在一代中途退出再恢复。两者均不调用模型。对照结果在 `comparison.json`，各实验完整凭证和分代保留/淘汰记录在子目录中。
+
+真实后端通过 `init --seed ... --config ...` 采用相同策略接口。初始化前在完整配置中设置以下字段（这是局部示例，不是完整配置）：
+
+```json
+{
+  "strategy": "beam",
+  "search": {"beam_width": 2, "children_per_parent": 2},
+  "budget": {
+    "max_proposals": 6, "max_evaluations": 7, "max_seconds": 600,
+    "proposal_timeout": 120, "evaluation_timeout": 220
+  }
+}
+```
+
+宽度和每父代名额接受 1–8 的整数。次数上限包含失败调用；评测上限含 baseline；600 秒是累计调用时间上限，不保证跑完全部候选。`init-harbor --strategy beam` 仍保留单轮 smoke 的原预算，不会自动扩大真实调用次数；要扩展需在新的完整配置中明确设置预算。
+
+`run --steps 1` 会完成一个新提案及其可用评测，然后暂停；再次 `run` 继续剩余名额。一代未完成时不做筛选。全部孩子失败时停止原因为 `search_exhausted`，已有最佳候选仍可导出。模型/运行错误仍以退出码 1 报告，不能因保留了 best 就忽略错误。
 
 ## 一次真实短闭环
 
@@ -116,8 +145,8 @@ python3 -m venv .venv
 ```bash
 uv build --wheel
 python3 scripts/accept_release.py \
-  --wheel dist/autor_outer-0.1.0-py3-none-any.whl \
-  --output runs/acceptance-new
+  --wheel dist/autor_outer-0.2.0.dev0-py3-none-any.whl \
+  --demo-strategy beam --output runs/acceptance-new
 ```
 
 上面只运行合成验收。如需真实失败闭环和导出复测，追加 `--real-model gpt-6-astra --seed-prompt examples/failure-feedback/prompt.md`，约四次模型调用。脚本在工作区外创建两个全新 venv，从 wheel 安装，清除 PYTHONPATH；生成导出后删除生产环境和源实验路径，再在另一个环境独立执行。失败也保留 acceptance.json 与命令日志，重试必须选择新的输出目录。
@@ -166,7 +195,7 @@ Harbor 的 inner 认证不同于宿主机 Codex 自动登录：默认使用 OPEN
   --outer-model '<可用的 Codex 模型 ID>' \
   --inner-model '<Harbor 支持的模型名称>' \
   --inner-version '<固定的 @openai/codex npm 版本>' \
-  --task extract-elf
+  --task fix-git
 uv run --python 3.12 --with harbor==0.24.0 autor doctor --run runs/harbor-smoke
 uv run --python 3.12 --with harbor==0.24.0 autor run runs/harbor-smoke
 ```
