@@ -57,8 +57,8 @@ def select_parent(state):
     if not items:
         raise AutorError("No measured parent is available")
     strategy = state["config"]["strategy"]
-    if strategy == "beam":
-        view = beam_view(state)
+    if strategy in ("beam", "adaptive_beam"):
+        view = search_view(state)
         if view["exhausted"]:
             return None
         if view["next_parent"] is None:
@@ -70,3 +70,10 @@ def select_parent(state):
     counts = {c["id"]: sum(c["id"] in x["parents"] for x in state["candidates"]) for c in items}
     available = [c for c in items if counts[c["id"]] < 2] or items
     return min(available, key=lambda c: (c["depth"], counts[c["id"]], -c["score"], c["id"]))
+
+
+def search_view(state):
+    if state["config"]["strategy"] == "adaptive_beam":
+        from .adaptive import adaptive_view
+        return adaptive_view(state)
+    return beam_view(state)

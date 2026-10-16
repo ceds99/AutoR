@@ -1,0 +1,482 @@
+{
+  "date": "2026-10-16",
+  "version": "0.2.0.dev2",
+  "status": "implementation-validated-real-comparison-gated",
+  "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
+  "support_hash": "2f85c6970a8a549d6e1e8ebe97553488289486021cd7da0a5024b3493cdb8533",
+  "comparison_runner_sha256": "0995952813782e93855eb64c74fd9236ad39b4153ffc97155265a9f4d2bf2c94",
+  "tests": {
+    "passed": 93,
+    "python": "3.12",
+    "harbor": "0.24.0",
+    "log_sha256": "570577c4d16d92f82cba2ea88fe6619717156603d5dafa5905ecea574ea15763"
+  },
+  "synthetic_comparison": {
+    "synthetic": true,
+    "model_calls": 0,
+    "warning": "Synthetic outcomes exercise control flow; they do not estimate strategy effectiveness.",
+    "caps": {
+      "max_proposals": 6,
+      "max_evaluations": 8,
+      "max_task_trials": 16,
+      "max_seconds": 60
+    },
+    "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
+    "results": {
+      "A": {
+        "best": "c0001",
+        "stop_reason": "proposal_budget",
+        "strategy": "beam",
+        "synthetic": true,
+        "search": {
+          "beam_width": 2,
+          "children_per_parent": 2,
+          "rounds": [
+            {
+              "generation": 1,
+              "parents": [
+                "c0000"
+              ],
+              "children": [
+                "c0001",
+                "c0002"
+              ],
+              "slots": 2,
+              "complete": true,
+              "selected": [
+                "c0001",
+                "c0002"
+              ],
+              "pruned": [],
+              "failed": []
+            },
+            {
+              "generation": 2,
+              "parents": [
+                "c0001",
+                "c0002"
+              ],
+              "children": [
+                "c0003",
+                "c0004",
+                "c0005",
+                "c0006"
+              ],
+              "slots": 4,
+              "complete": true,
+              "selected": [
+                "c0003",
+                "c0004"
+              ],
+              "pruned": [
+                "c0005",
+                "c0006"
+              ],
+              "failed": []
+            }
+          ],
+          "frontier": [
+            "c0003",
+            "c0004"
+          ],
+          "next_parent": "c0003",
+          "exhausted": false
+        },
+        "budget": {
+          "proposals_used": 6,
+          "evaluations_used": 7,
+          "seconds_used": 0.0002989999999999868
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.2
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          },
+          {
+            "id": "c0004",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          },
+          {
+            "id": "c0005",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          },
+          {
+            "id": "c0006",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.55
+          }
+        ],
+        "completed_task_trials": 14,
+        "sample_counts": {
+          "c0000": 1,
+          "c0001": 1,
+          "c0002": 1,
+          "c0003": 1,
+          "c0004": 1,
+          "c0005": 1,
+          "c0006": 1
+        }
+      },
+      "B": {
+        "best": "c0001",
+        "stop_reason": "evaluation_budget",
+        "strategy": "adaptive_beam",
+        "synthetic": true,
+        "search": {
+          "beam_width": 2,
+          "children_per_parent": 2,
+          "rounds": [
+            {
+              "generation": 1,
+              "parents": [
+                "c0000"
+              ],
+              "children": [
+                "c0001",
+                "c0002"
+              ],
+              "slots": 2,
+              "allocations": {
+                "c0000": 2
+              },
+              "allocation_reasons": {
+                "c0000": "initial_exploration"
+              },
+              "complete": true,
+              "selected": [
+                "c0001",
+                "c0002"
+              ],
+              "pruned": [],
+              "failed": [],
+              "mix_eligible": [],
+              "mix_used": false
+            },
+            {
+              "generation": 2,
+              "parents": [
+                "c0001",
+                "c0002"
+              ],
+              "children": [
+                "c0003"
+              ],
+              "slots": 4,
+              "allocations": {
+                "c0001": 2,
+                "c0002": 2
+              },
+              "allocation_reasons": {
+                "c0001": "replicated_improvement",
+                "c0002": "replicated_improvement"
+              },
+              "complete": false,
+              "selected": [],
+              "pruned": [],
+              "failed": [],
+              "mix_eligible": [],
+              "mix_used": false
+            }
+          ],
+          "frontier": [
+            "c0001",
+            "c0002"
+          ],
+          "next_parent": "c0002",
+          "next_parents": [
+            "c0002"
+          ],
+          "directive": {
+            "operator": "verification",
+            "focus_tasks": [
+              "fixture-a"
+            ],
+            "allocation_reason": "replicated_improvement",
+            "remaining_parent_slots": 2
+          },
+          "exhausted": false
+        },
+        "budget": {
+          "proposals_used": 3,
+          "evaluations_used": 8,
+          "seconds_used": 0.0003115000000000201
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.2,
+            "confirmed": true
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "failure_analysis",
+              "focus_tasks": [
+                "fixture-a",
+                "fixture-b"
+              ],
+              "allocation_reason": "initial_exploration",
+              "remaining_parent_slots": 2
+            }
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "verification",
+              "focus_tasks": [
+                "fixture-a",
+                "fixture-b"
+              ],
+              "allocation_reason": "initial_exploration",
+              "remaining_parent_slots": 1
+            }
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0001"
+            ],
+            "status": "evaluated",
+            "score": 0.55,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "verification",
+              "focus_tasks": [
+                "fixture-b"
+              ],
+              "allocation_reason": "replicated_improvement",
+              "remaining_parent_slots": 2
+            }
+          }
+        ],
+        "completed_task_trials": 16,
+        "sample_counts": {
+          "c0000": 2,
+          "c0001": 2,
+          "c0002": 2,
+          "c0003": 2
+        }
+      },
+      "C": {
+        "best": "c0003",
+        "stop_reason": "evaluation_budget",
+        "strategy": "adaptive_beam",
+        "synthetic": true,
+        "search": {
+          "beam_width": 2,
+          "children_per_parent": 2,
+          "rounds": [
+            {
+              "generation": 1,
+              "parents": [
+                "c0000"
+              ],
+              "children": [
+                "c0001",
+                "c0002"
+              ],
+              "slots": 2,
+              "allocations": {
+                "c0000": 2
+              },
+              "allocation_reasons": {
+                "c0000": "initial_exploration"
+              },
+              "complete": true,
+              "selected": [
+                "c0001",
+                "c0002"
+              ],
+              "pruned": [],
+              "failed": [],
+              "mix_eligible": [],
+              "mix_used": false
+            },
+            {
+              "generation": 2,
+              "parents": [
+                "c0001",
+                "c0002"
+              ],
+              "children": [
+                "c0003"
+              ],
+              "slots": 4,
+              "allocations": {
+                "c0001": 2,
+                "c0002": 2
+              },
+              "allocation_reasons": {
+                "c0001": "replicated_improvement",
+                "c0002": "replicated_improvement"
+              },
+              "complete": false,
+              "selected": [],
+              "pruned": [],
+              "failed": [],
+              "mix_eligible": [
+                "c0001",
+                "c0002"
+              ],
+              "mix_used": true
+            }
+          ],
+          "frontier": [
+            "c0001",
+            "c0002"
+          ],
+          "next_parent": "c0002",
+          "next_parents": [
+            "c0002"
+          ],
+          "directive": {
+            "operator": "verification",
+            "focus_tasks": [
+              "fixture-a"
+            ],
+            "allocation_reason": "replicated_improvement",
+            "remaining_parent_slots": 2
+          },
+          "exhausted": false
+        },
+        "budget": {
+          "proposals_used": 3,
+          "evaluations_used": 8,
+          "seconds_used": 0.0002829570000000142
+        },
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.2,
+            "confirmed": true
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "failure_analysis",
+              "focus_tasks": [
+                "fixture-a",
+                "fixture-b"
+              ],
+              "allocation_reason": "initial_exploration",
+              "remaining_parent_slots": 2
+            }
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.55,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "verification",
+              "focus_tasks": [
+                "fixture-a",
+                "fixture-b"
+              ],
+              "allocation_reason": "initial_exploration",
+              "remaining_parent_slots": 1
+            }
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0001",
+              "c0002"
+            ],
+            "status": "evaluated",
+            "score": 0.8,
+            "confirmed": true,
+            "search_directive": {
+              "operator": "mix",
+              "focus_tasks": [
+                "fixture-b"
+              ],
+              "allocation_reason": "replicated_improvement",
+              "remaining_parent_slots": 2
+            }
+          }
+        ],
+        "completed_task_trials": 16,
+        "sample_counts": {
+          "c0000": 2,
+          "c0001": 2,
+          "c0002": 2,
+          "c0003": 2
+        }
+      }
+    }
+  },
+  "real_comparison": {
+    "started": false,
+    "reason": "No eligible natural failure yet. Hard-task screening in progress; zero from Rosetta/chroot verifier failure excluded.",
+    "holdout_evaluated": false
+  },
+  "limitations": [
+    "Synthetic scores are assigned fixtures, not measured harness improvement.",
+    "Repeated sample separation is not a significance test.",
+    "The frozen Harbor bridge uses local runtime, Docker images and instruction snapshots; these resources are not packaged by generic export.",
+    "Known scoring infrastructure signatures are rejected automatically; unknown scoring faults still require analyst review."
+  ]
+}

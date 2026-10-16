@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "autor-outer"
-version = "0.2.0.dev1"
+version = "0.2.0.dev2"
 description = "A small, fixed outer loop for evolving agent harnesses"
 requires-python = ">=3.9"
 dependencies = []

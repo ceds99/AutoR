@@ -54,6 +54,13 @@ def propose(config, parent, evidence, work, timeout):
     prompt += "\nEditable files: " + json.dumps(config["editable_files"])
     prompt += "\nRequired text: " + json.dumps(config.get("required_text", {}))
     prompt += "\nRead parent/ and evidence.json. Return one JSON proposal using the output schema."
+    if evidence.get("search_directive"):
+        prompt += ("\nFollow search_directive in the evidence. failure_analysis: diagnose a concrete recurring failure; "
+                   "verification: improve checks and recovery without embedding task answers; simplify: remove wasted "
+                   "work or conflicting instructions while preserving successful behavior. For mix, synthesize the "
+                   "two supplied parent harnesses into one coherent change, resolve conflicts, and explain which "
+                   "idea came from each parent. Secondary parents are provided as editable_contents in evidence.json. "
+                   "These are proposal directions, not guarantees of improvement. Do not change frozen resources.")
     (work / "request.txt").write_text(prompt, encoding="utf-8")
     from .permissions import config_args, verify_boundary
     executable = config["proposer"].get("executable", "codex")
@@ -185,7 +192,8 @@ def evaluate(config, harness, work, timeout):
         return normalize_result({"status": "ok", "tasks": tasks, "backend": "demo", "synthetic": True})
     if settings["kind"] == "command":
         result_path = work / "result.json"
-        substitutions = {"{harness}": str(harness), "{result}": str(result_path), "{work}": str(work)}
+        substitutions = {"{harness}": str(harness), "{result}": str(result_path), "{work}": str(work),
+                         "{timeout}": str(timeout)}
         argv = []
         for part in settings["argv"]:
             for old, new in substitutions.items():

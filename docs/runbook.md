@@ -309,3 +309,23 @@ uv run --python 3.12 --with harbor==0.24.0 python -m unittest discover -v
 ```
 
 公开的 [验收摘要](evidence/v0.1.0.json) 去除了本机路径和原始会话日志，保留原始凭证摘要以便与本地冻结交付核对。它不是原始完整执行轨迹。
+
+
+## Adaptive beam 与有门禁的三组对照
+
+合成机制检查不调用模型：
+
+```bash
+python3 scripts/adaptive_search_smoke.py runs/adaptive-check
+python3 -m autor demo runs/adaptive-demo --strategy adaptive_beam --mixing
+```
+
+A/B/C 合成检查使用相同预算上限；脚本指定分数，只验证调度、复测、混合与恢复，不证明算法效果。原 beam 仍可直接运行。
+
+真实对照使用 `scripts/compare_search.py`：先为选中的任务创建全新的冻结 pilot；提供其公开 instruction 映射 JSON、匹配的镜像回执和经过分析的自然失败 trial 目录。`prepare --help` 列出所需参数，随后按 `baselines <root>`、`search <root>` 分阶段运行。这些调用需要 Harbor 0.24.0、同一 Python 运行环境、专用 Docker VM 和认证；所有输出目录必须位于 VM 允许挂载的路径内。
+
+每组最多 6 次提案、8 次完整任务集评测、1800 秒累计调用时间，复测与失败计入同一上限；记录实际用量。A 使用 beam；B 使用 adaptive_beam；C 开启 mixing。baseline 不复现失败时，`search` 拒绝启动。若时间预算提前耗尽，报告未完成阶段，不能声称混合或效果已经得到验证。
+
+JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`children_per_parent`、`confirmation_samples`（2–4）和 `mixing`（布尔值）。复测中断后继续用 `autor run`；程序只接纳已落盘的独立结果，不重放不确定调用。`needs_confirmation` 表示预算耗尽前尚未完成确认，不能当作最佳候选。原始样本在 `measurements/`，`evaluation.json` 是派生的逐题平均值。
+
+本地 Harbor wrapper 使用命令评测器的 `{timeout}` 占位符接收实际剩余时间，保留 30 秒取消空间。强制终止或主机崩溃后仍须核对 Docker 残留；取消本地进程并不保证容器已经停止。重启前不要改变冻结源码、运行时或配置；有修复时新建实验，保留旧账本。该本地 wrapper 的外部 runtime、镜像和指令文件目前不随通用导出包迁移。

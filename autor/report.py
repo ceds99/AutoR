@@ -20,9 +20,9 @@ def write_report(root, state):
     for c in state["candidates"]:
         lines.append("| {} | {} | {} | {} | {} |".format(c["id"], ", ".join(c["parents"]) or "seed",
                      c["status"], c.get("score", "—"), c.get("promoted", False)))
-    if config["strategy"] == "beam":
-        from .search import beam_view
-        view = beam_view(state)
+    if config["strategy"] in ("beam", "adaptive_beam"):
+        from .search import search_view
+        view = search_view(state)
         lines += ["", "## Beam 搜索", "",
                   "每代全部名额完成后才筛选；失败占用名额；淘汰只影响后续选父，历史最佳仍可导出。", "",
                   "- 当前 frontier：" + (", ".join(view["frontier"]) or "空"),
@@ -35,6 +35,12 @@ def write_report(root, state):
                 ", ".join(r["selected"]) or "—", ", ".join(r["pruned"]) or "—", ", ".join(r["failed"]) or "—"))
     for c in state["candidates"]:
         lines += ["", "## " + c["id"], "", "假设：" + c.get("hypothesis", "尚未生成")]
+        if c.get("samples"):
+            lines += ["", "独立测量：{}；复测完成：{}；样本均分：{}。".format(
+                len(c["samples"]), c.get("confirmed", False),
+                ", ".join(str(s["score"]) for s in c["samples"]))]
+        if c.get("search_directive"):
+            lines += ["", "候选方向与预算依据：" + str(c["search_directive"])]
         for label, key in (("诊断", "diagnosis"), ("失败原因", "error")):
             if c.get(key):
                 lines += ["", label + "：" + str(c[key])]

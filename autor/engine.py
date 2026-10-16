@@ -8,7 +8,7 @@ import time
 from . import __version__
 from . import adapters
 from .config import validate, validate_harness
-from .search import beam_view, select_parent
+from .search import beam_view, search_view, select_parent
 from .storage import (AutorError, copy_harness, digest, locked, manifest,
                       outer_fingerprint, read_json, safe_relative, write_json)
 
@@ -40,8 +40,8 @@ def initialize(root, seed, config):
                         "hash": digest(files), "hypothesis": "Imported seed; MA is outside this run"}],
         "events": [],
     }
-    if config["strategy"] == "beam":
-        state["search"] = beam_view(state)
+    if config["strategy"] in ("beam", "adaptive_beam"):
+        state["search"] = search_view(state)
     write_json(root / "run.json", state)
     return state
 
@@ -55,7 +55,7 @@ def load(root, verify_outer=True):
     if verify_outer and outer_fingerprint() != state["outer_hash"]:
         raise AutorError("Outer code or skill changed; start a new experiment to preserve provenance")
     for item in state["candidates"]:
-        if item.get("hash") and item["status"] in ("ready", "evaluating", "evaluated"):
+        if item.get("hash") and item["status"] in ("ready", "needs_confirmation", "evaluating", "evaluated"):
             if digest(manifest(root / "candidates" / item["id"] / "harness")) != item["hash"]:
                 raise AutorError("Harness snapshot was modified: " + item["id"])
     return state
@@ -95,6 +95,16 @@ def apply_proposal(config, parent, child, proposal):
     return digest(manifest(child))
 
 
+def proposal_evidence(candidate):
+    """Keep raw repetitions in the ledger, send their compact scores to the proposer."""
+    result = {k: v for k, v in candidate.items() if k != "samples"}
+    if candidate.get("samples"):
+        result["measurements"] = [{"score": sample["score"],
+            "tasks": [{"task_id": t["task_id"], "attempt": t.get("attempt", 0), "score": t["score"]}
+                      for t in sample["tasks"]]} for sample in candidate["samples"]]
+    return result
+
+
 class Experiment:
     def __init__(self, root, notify=None):
         self.root = Path(root).resolve()
@@ -102,8 +112,8 @@ class Experiment:
         self.notify = notify or (lambda event: None)
 
     def save(self):
-        if self.state["config"]["strategy"] == "beam":
-            self.state["search"] = beam_view(self.state)
+        if self.state["config"]["strategy"] in ("beam", "adaptive_beam"):
+            self.state["search"] = search_view(self.state)
         write_json(self.root / "run.json", self.state)
 
     def event(self, kind, **data):
@@ -159,6 +169,32 @@ class Experiment:
             self.state["task_keys"] = result["task_keys"]
             self.state["task_checksums"] = checksums
         candidate.update(status="evaluated", score=result["score"], task_scores=result["tasks"])
+        if self.state["config"]["strategy"] == "adaptive_beam":
+            from .adaptive import confirmation_reason
+            samples = candidate.setdefault("samples", [])
+            number = candidate.get("pending_measurement", len(samples) + 1)
+            if number != len(samples) + 1:
+                raise AutorError("Measurement sequence mismatch; refusing duplicate sample")
+            samples.append(result)
+            # Preserve each raw sample; the candidate view is their task-wise mean.
+            averaged = []
+            for key in result["task_keys"]:
+                rows = [next(t for t in sample["tasks"]
+                             if [t["task_id"], t.get("attempt", 0)] == key) for sample in samples]
+                averaged.append({**rows[-1], "score": sum(t["score"] for t in rows) / len(rows)})
+            aggregate = adapters.normalize_result({**result, "tasks": averaged,
+                                                    "measurement_count": len(samples)})
+            candidate.update(score=aggregate["score"], task_scores=aggregate["tasks"],
+                             confirmed=len(samples) >= self.state["config"].get("search", {}).get("confirmation_samples", 2))
+            result = aggregate
+            candidate.pop("pending_measurement", None)
+            write_json(self.candidate_dir(candidate) / "evaluation.json", aggregate)
+            reason = confirmation_reason(self.state, candidate)
+            if reason:
+                candidate.update(status="needs_confirmation", promoted=False, confirmation_reason=reason)
+                self.event("confirmation_scheduled", candidate=candidate["id"], reason=reason,
+                           sample=len(samples), score=candidate["score"])
+                return
         if candidate["parents"]:
             parent = next(c for c in self.state["candidates"] if c["id"] == candidate["parents"][0])
             previous = {(t["task_id"], t.get("attempt", 0)): t["score"] for t in parent["task_scores"]}
@@ -171,6 +207,9 @@ class Experiment:
             candidate["comparison"] = comparison
         best = next((c for c in self.state["candidates"] if c["id"] == self.state["best"]), None)
         candidate["promoted"] = best is None or candidate["score"] > best["score"]
+        if self.state["config"]["strategy"] == "adaptive_beam":
+            from .adaptive import improved
+            candidate["promoted"] = candidate.get("confirmed", False) and (best is None or improved(candidate, best))
         if candidate["promoted"]:
             self.state["best"] = candidate["id"]
         self.event("evaluated", candidate=candidate["id"], score=candidate["score"],
@@ -185,6 +224,9 @@ class Experiment:
             if c["status"] not in ("proposing", "evaluating"):
                 continue
             result_path = self.candidate_dir(c) / "evaluation.json"
+            if self.state["config"]["strategy"] == "adaptive_beam":
+                number = c.get("pending_measurement", len(c.get("samples", [])) + 1)
+                result_path = self.candidate_dir(c) / "measurements" / ("m%04d" % number) / "result.json"
             if c["status"] == "evaluating" and result_path.is_file():
                 try:
                     self.finish_evaluation(c, read_json(result_path))
@@ -198,12 +240,22 @@ class Experiment:
 
     def evaluate(self, candidate):
         directory = self.candidate_dir(candidate)
+        adaptive = self.state["config"]["strategy"] == "adaptive_beam"
+        work = directory / "evaluation"
+        result_path = directory / "evaluation.json"
+        if adaptive:
+            number = len(candidate.get("samples", [])) + 1
+            candidate["pending_measurement"] = number
+            work = directory / "measurements" / ("m%04d" % number)
+            result_path = work / "result.json"
+            if result_path.exists():
+                raise AutorError("Measurement already exists; use recovery instead of replay")
         try:
             result = self.call("evaluation", candidate, lambda timeout: adapters.evaluate(
-                self.state["config"], directory / "harness", directory / "evaluation", timeout))
+                self.state["config"], directory / "harness", work, timeout))
             if digest(manifest(directory / "harness")) != candidate["hash"]:
                 raise AutorError("Evaluator modified the harness snapshot")
-            write_json(directory / "evaluation.json", result)
+            write_json(result_path, result)
             self.finish_evaluation(candidate, result)
         except Exception as e:
             candidate.update(status="error", error=str(e))
@@ -211,17 +263,35 @@ class Experiment:
 
     def propose(self, parent=None):
         parent = parent or select_parent(self.state)
+        parents = [parent["id"]]
+        directive = None
+        if self.state["config"]["strategy"] == "adaptive_beam":
+            view = search_view(self.state)
+            parents, directive = view["next_parents"], view["directive"]
+            if not parents or parents[0] != parent["id"]:
+                raise AutorError("Adaptive parent decision changed")
         candidate = {"id": "c{:04d}".format(len(self.state["candidates"])),
-                     "parents": [parent["id"]], "depth": parent["depth"] + 1, "status": "proposing"}
+                     "parents": parents, "depth": parent["depth"] + 1, "status": "proposing"}
+        if directive:
+            candidate["search_directive"] = directive
         self.state["candidates"].append(candidate)
         directory = self.candidate_dir(candidate)
         directory.mkdir(parents=True)
         evidence = {
             "proposal_number": self.state["proposals_used"] + 1,
-            "parent": parent,
-            "history": [{k: c[k] for k in ("id", "parents", "status", "score", "diagnosis", "hypothesis", "comparison", "error") if k in c}
+            "parent": proposal_evidence(parent),
+            "history": [{k: c[k] for k in ("id", "parents", "status", "score", "confirmed", "diagnosis", "hypothesis", "comparison", "error") if k in c}
                         for c in self.state["candidates"][:-1]],
         }
+        if directive:
+            evidence["search_directive"] = directive
+            evidence["secondary_parents"] = []
+            for parent_id in parents[1:]:
+                secondary = next(c for c in self.state["candidates"] if c["id"] == parent_id)
+                snapshot = self.candidate_dir(secondary) / "harness"
+                evidence["secondary_parents"].append({"candidate": proposal_evidence(secondary),
+                    "editable_contents": {name: (snapshot / name).read_text(encoding="utf-8")
+                                          for name in self.state["config"]["editable_files"]}})
         phase = "proposal"
         try:
             proposal = self.call("proposal", candidate, lambda timeout: adapters.propose(
@@ -263,7 +333,8 @@ class Experiment:
                     if self.remaining() <= 0:
                         reason = "time_budget"
                         break
-                    ready = next((c for c in self.state["candidates"] if c["status"] == "ready"), None)
+                    ready = next((c for c in self.state["candidates"]
+                                  if c["status"] in ("ready", "needs_confirmation")), None)
                     if ready:
                         if self.state["evaluations_used"] >= budget["max_evaluations"]:
                             reason = "evaluation_budget"

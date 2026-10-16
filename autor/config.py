@@ -15,14 +15,25 @@ def validate(config):
         raise AutorError("config.schema_version must be 1")
     if not isinstance(config.get("objective"), str) or not config["objective"].strip():
         raise AutorError("An objective is required")
-    if config.get("strategy") not in ("hill_climb", "branching", "beam"):
-        raise AutorError("strategy must be hill_climb, branching or beam")
+    if config.get("strategy") not in ("hill_climb", "branching", "beam", "adaptive_beam"):
+        raise AutorError("strategy must be hill_climb, branching, beam or adaptive_beam")
     search = config.get("search", {})
-    if not isinstance(search, dict) or set(search) - {"beam_width", "children_per_parent"}:
-        raise AutorError("search accepts only beam_width and children_per_parent")
-    if search and config["strategy"] != "beam":
-        raise AutorError("search settings require strategy beam")
+    keys = {"beam_width", "children_per_parent"}
+    if config["strategy"] == "adaptive_beam":
+        keys |= {"confirmation_samples", "mixing"}
+    if not isinstance(search, dict) or set(search) - keys:
+        raise AutorError("Unknown search setting for this strategy")
+    if search and config["strategy"] not in ("beam", "adaptive_beam"):
+        raise AutorError("search settings require a beam strategy")
     for key, value in search.items():
+        if key == "mixing":
+            if type(value) is not bool:
+                raise AutorError("search.mixing must be a boolean")
+            continue
+        if key == "confirmation_samples":
+            if type(value) is not int or not 2 <= value <= 4:
+                raise AutorError("confirmation_samples must be an integer from 2 to 4")
+            continue
         if type(value) is not int or not 1 <= value <= 8:
             raise AutorError("search." + key + " must be an integer from 1 to 8")
     allowed = config.get("editable_files")

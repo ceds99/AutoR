@@ -18,7 +18,7 @@ def demo_config(strategy="branching", proposals=3):
         "editable_files": ["prompt.md"],
         "required_text": {"prompt.md": ["{{ instruction }}"]},
         "proposer": {"kind": "demo"}, "evaluator": {"kind": "demo"},
-        "budget": {"max_proposals": proposals, "max_evaluations": proposals + 1,
+        "budget": {"max_proposals": proposals, "max_evaluations": (proposals + 1) * (2 if strategy == "adaptive_beam" else 1),
                    "max_seconds": 60, "proposal_timeout": 10, "evaluation_timeout": 10},
     }
 
