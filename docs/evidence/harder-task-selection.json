@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "status": "screening-complete-fresh-baselines-running",
+  "status": "natural-failure-did-not-recur-screening-more-tasks",
   "source": {
     "repository": "https://github.com/harbor-framework/terminal-bench.git",
     "revision": "452bf305c6daa62fc59061d22133a7cbc7c1572e",
@@ -9,7 +9,9 @@
   "selected_tasks": [
     "terminal-bench/batched-eval-parity",
     "terminal-bench/session-window-debug",
-    "terminal-bench/wal-recovery-ordering"
+    "terminal-bench/wal-recovery-ordering",
+    "terminal-bench/cargo-flight-dispatch",
+    "terminal-bench/fin-saccr-rwa"
   ],
   "inner": {
     "model": "openai/gpt-6-astra",
@@ -162,5 +164,14 @@
       "project_suffix": "__verifier__trial",
       "content_sha256": "da088155a9f4e21b855520151bdd78dea09e8a47e14ca050c8a5cb24b0bd6101"
     }
-  ]
+  ],
+  "reproduction_observation": {
+    "task": "terminal-bench/batched-eval-parity",
+    "trial": "batched-eval-parity__fsgi3By",
+    "score": 1,
+    "passed_tests": 5,
+    "same_image_contents": true,
+    "seed_prompt_verified": true,
+    "no_accepted_aggregate": true
+  }
 }

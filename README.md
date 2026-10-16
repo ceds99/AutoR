@@ -53,6 +53,6 @@ python3 -m venv .venv
 
 新一轮有界筛选已完成：WAL 恢复、正则、数据合并、Git 多分支、SQLite 截断恢复、C++ 内存故障六题均为 1.0。模型与 seed 保持不变，每题 agent 上限 300 秒。有效试验累计约 27 分 42 秒，其中 agent 执行约 7 分 44 秒；这不含失败、网络诊断和镜像准备。环境故障单独记录，中断请求费用未知。
 
-**已找到明确自然失败，新的 A/B/C 基线复测已启动。** 模型、seed 和 inner Codex 版本不变。Terminal-Bench 4.0 的 `batched-eval-parity` 正常完成但 2 项语义测试失败（评分 0）；`wal-recovery-ordering` 连续 10 轮、每轮 97 项测试通过（评分 1），作为回归任务。`session-window-debug` 的 worker 失败原因不明，排除出对照。旧流水线题的失败未稳定复现，旧对照已关闭且零提案。新对照每组上限相同，只有 seed 失败复现才进入真实搜索；目前没有搜索提分结论。102 项测试通过，保留集未评测。[最新筛选凭证](docs/evidence/harder-task-selection.json)与[对照状态](docs/evidence/adaptive-search.json)。
+**继续保持模型与 seed 筛选更难任务；两轮对照均被复现门禁拦截，尚未调用真实 proposer。** 新版 `batched-eval-parity` 首次出现 2 项语义失败，但 A 组新测量全部通过；prompt 与镜像内容均核验一致。随后取消 A 的剩余任务，B/C 没有启动，不把部分结果当作完整组均分。WAL 题通过 10 轮验证，worker 故障原因不明的会话窗口题被排除。当前补测航线规划和 SA-CCR 资本计算任务。102 项测试通过，保留集未评测。[最新筛选凭证](docs/evidence/harder-task-selection.json)与[对照状态](docs/evidence/adaptive-search.json)。
 
 两道保留任务不用于选题、选父或调 prompt。Proposer 的命令文件访问已受限；独立保留集评测服务和候选冻结门禁仍待实现。有条件的双父代混合和显式复测已实现；MCTS、通用多父代合并与并行评测后置。
