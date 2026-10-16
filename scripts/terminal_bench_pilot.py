@@ -54,7 +54,7 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
             task_names=None, agent_timeout=180, max_seconds=1200, apt_proxy=None, network_proxy=None,
             task_git_url="https://github.com/harbor-framework/terminal-bench-2.git",
             task_revision=REVISION, task_prefix="", dataset_version="2.0", task_name_prefix="",
-            dependency_cache=None, docker_platform=None):
+            dependency_cache=None, docker_platform=None, keep_images=False):
     root = Path(root).resolve()
     if root.exists():
         raise AutorError("Choose a new pilot directory")
@@ -107,6 +107,8 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
     job["tasks"] = [{"path": task_prefix + name, "git_url": task_git_url,
                      "git_commit_id": task_revision, "source": "terminal-bench-" + dataset_version + "-pilot"} for name in tasks]
     job["agents"][0]["kwargs"]["reasoning_effort"] = "low"
+    if keep_images:
+        job["environment"]["delete"] = False
     overrides = {}
     if docker_platform:
         platform_path = root / "runtime/docker-platform.yaml"
@@ -261,6 +263,7 @@ def main():
     init.add_argument("--inner-version", required=True)
     init.add_argument("--holdout-commitment", required=True)
     init.add_argument("--node-runtime", type=Path, help="Stage a trusted extracted Linux Node distribution as a hashed read-only runtime mount")
+    init.add_argument("--keep-images", action="store_true", help="Retain build images for content receipts; containers are still removed")
     init.add_argument("--docker-platform", choices=["linux/amd64", "linux/arm64"], help="Freeze agent image architecture; separate verifier keeps its native platform")
     init.add_argument("--dependency-cache", type=Path, help="Stage an audited third-party uv wheel cache; cloned privately inside each container")
     init.add_argument("--bounded-apt", action="store_true", help="Freeze an APT 15-second connection timeout with no retries; recorded runtime deviation")
@@ -282,7 +285,7 @@ def main():
             result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment,
                              args.bounded_apt, args.node_runtime, args.task, args.agent_timeout, args.max_seconds,
                              args.apt_proxy, args.network_proxy, args.task_git_url, args.task_revision,
-                             args.task_prefix, args.dataset_version, args.task_name_prefix, args.dependency_cache, args.docker_platform)
+                             args.task_prefix, args.dataset_version, args.task_name_prefix, args.dependency_cache, args.docker_platform, args.keep_images)
         elif args.command == "check":
             result = preflight(args.root)
             write_json(args.root / "preflight.json", result)

@@ -61,6 +61,16 @@ class FrozenHarborTests(unittest.TestCase):
             with self.assertRaisesRegex(AutorError,'image changed'):
                 bridge.verify_images(images,bridge.sha(images),['task-one'])
 
+    def test_bridge_preserves_images_for_post_run_check(self):
+        from autor.storage import read_json
+        def inspect_job(*args):
+            job=read_json(self.root/'work/job.json')
+            self.assertFalse(job['environment']['delete'])
+            raise AutorError('fixture stop')
+        with patch.object(bridge,'verify_harbor_version'), patch.object(bridge,'verify_images'), patch.object(
+                bridge,'cleanup_owned',return_value=[]), patch.object(bridge,'run_process',side_effect=inspect_job):
+            with self.assertRaisesRegex(AutorError,'fixture stop'):bridge.run(self.args)
+
     def test_command_bridge_receives_actual_remaining_timeout(self):
         config={'evaluator':{'kind':'command','argv':['fake','{timeout}','{result}']}}
         seen=[]
@@ -73,10 +83,24 @@ class FrozenHarborTests(unittest.TestCase):
 
     def test_cleanup_is_scoped_to_generated_trial_project(self):
         trial=self.root/'work/jobs/evaluation/task__AbCd';trial.mkdir(parents=True)
-        with patch.object(bridge.subprocess,'check_output',return_value='owned-id\n') as query, patch.object(bridge.subprocess,'run') as remove:
-            self.assertEqual(bridge.cleanup_owned(self.root/'work'),['owned-id'])
-        self.assertEqual(query.call_args.args[0][-1],'label=com.docker.compose.project=task__abcd__env')
-        self.assertEqual(remove.call_args.args[0],['docker','rm','-f','owned-id'])
+        with patch.object(bridge.subprocess,'check_output',return_value='owned-id task__abcd__env\nverifier-id task__abcd__verifier__default\nother-id task__other__env\n') as query, patch.object(bridge.subprocess,'run') as remove:
+            self.assertEqual(bridge.cleanup_owned(self.root/'work'),['owned-id','verifier-id'])
+        self.assertEqual(remove.call_args.args[0],['docker','rm','-f','owned-id','verifier-id'])
+
+    def test_rebuilt_image_ignores_project_label_but_detects_file_drift(self):
+        import copy, json
+        old={'Config':{'Labels':{'com.docker.compose.project':'old'}},
+             'RootFS':{'Layers':['original']},'Architecture':'amd64','Os':'linux','Id':'old-id'}
+        fresh=copy.deepcopy(old);fresh['Config']['Labels']['com.docker.compose.project']='new'
+        expected=bridge.image_content_digest(old)
+        self.assertEqual(expected,bridge.image_content_digest(fresh))
+        receipts=[{'task':'task-one','project_suffix':'__env','content_sha256':expected}]
+        with patch.object(bridge.subprocess,'check_output',side_effect=['new-id',json.dumps([fresh])]):
+            self.assertEqual(len(bridge.verify_trial_images('task__abcd',receipts,'task-one')),1)
+        fresh['RootFS']['Layers']=['changed']
+        with patch.object(bridge.subprocess,'check_output',side_effect=['new-id',json.dumps([fresh])]):
+            with self.assertRaisesRegex(AutorError,'image content changed'):
+                bridge.verify_trial_images('task__abcd',receipts,'task-one')
 
     @unittest.skipUnless(importlib.util.find_spec('harbor'),'Harbor optional dependency')
     def test_actual_rendered_command_required_not_just_prompt_path(self):

@@ -338,4 +338,6 @@ JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`
 
 任务来源可通过 `--task-git-url`、`--task-revision`、`--task-prefix`、`--task-name-prefix`、`--dataset-version` 固定。revision 必须是完整 commit；目录前缀与 task.toml 中的任务名空间分别记录。旧对照来自 Terminal-Bench 2.0。新筛选单独固定 Terminal-Bench 4.0 的 `452bf305c6daa62fc59061d22133a7cbc7c1572e`，目录前缀为 `tasks/`、任务名空间为 `terminal-bench/`。版本之间不拼接 baseline。详见 [Terminal-Bench 4.0 官方更新](https://www.tbench.ai/news/terminal-bench-4-0)。
 
-ARM 宿主使用已有 x86 inner 运行时，可通过 `--docker-platform linux/amd64` 冻结 agent Compose overlay；需安装支持平台选择的 Docker Buildx，并检查实际镜像架构。独立 verifier 保持其原生架构，必须另记镜像回执；同一对照各组固定相同运行条件。该选项不会修改任务 Dockerfile、评分器或任务时间限制；pilot 的 agent 上限仍须显式记录。
+ARM 宿主使用已有 x86 inner 运行时，可通过 `--docker-platform linux/amd64` 冻结 agent Compose overlay；需安装支持平台选择的 Docker Buildx，并检查实际镜像架构。独立 verifier 保持其原生架构，必须另记镜像回执；同一对照各组固定相同运行条件。对每次重新构建的镜像，回执还应包含 `project_suffix` 和 `content_sha256`；wrapper 在接纳分数前比较实际镜像文件层及配置，仅忽略随 trial 改变的 Compose project 标签。该选项不会修改任务 Dockerfile、评分器或任务时间限制；pilot 的 agent 上限仍须显式记录。
+
+筛选时可加 `--keep-images` 保留构建镜像以制作回执；容器仍由 Compose down 移除。正式 wrapper 自动采用该清理方式，验收分数前核对实际构建内容。若筛选镜像已被清理，可用同源 `nop` 预热重新取得回执；预热不调用模型，其分数不得作为任务筛选或策略比较结果。

@@ -6,10 +6,10 @@
   "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
   "comparison_runner_sha256": "700173f6f19d824acf8b94f170873d40c58ceeb91fadf2e9460c740fbf6a18b9",
   "tests": {
-    "passed": 100,
+    "passed": 102,
     "python": "3.12",
     "harbor": "0.24.0",
-    "log_sha256": "e63c49e78b69215bc9f2fdae6ad0928555667479bc7460dda471d5c877a67173"
+    "log_sha256": "5906019584eb7a9a99937a269cc82cdad6d3cd55baa145bed60634c00a9f17d4"
   },
   "synthetic_comparison": {
     "synthetic": true,
@@ -710,6 +710,7 @@
   },
   "current_runner": {
     "sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
-    "old_experiment_not_resumable_after_fix": true
+    "old_experiment_not_resumable_after_fix": true,
+    "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b"
   }
 }

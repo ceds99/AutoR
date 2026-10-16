@@ -52,17 +52,51 @@ def invalid_verifier_feedback(feedback):
     return bool(re.search(r'rosetta error|No space left on device|Cannot connect to the Docker daemon|ERROR collecting|no tests ran',feedback,re.I))
 
 
+def image_content_digest(row):
+    """Compare rebuilt images without the per-trial Compose project label."""
+    config=json.loads(json.dumps(row['Config']))
+    labels=config.get('Labels') or {}
+    labels.pop('com.docker.compose.project',None)
+    config['Labels']=labels
+    return digest({'rootfs':row['RootFS'],'config':config,
+                   'architecture':row['Architecture'],'os':row['Os']})
+
+
+def verify_trial_images(trial, receipts, task):
+    checked=[]
+    for item in receipts:
+        if item['task']!=task or 'project_suffix' not in item:continue
+        suffix=item['project_suffix']
+        if not re.fullmatch(r'__(?:env|verifier__[a-z0-9_-]+)',suffix):
+            raise AutorError('Unsupported trial image project suffix')
+        project=Path(trial).name.lower()+suffix
+        ids=subprocess.check_output(['docker','image','ls','-q','--filter',
+            'label=com.docker.compose.project='+project,'--filter',
+            'label=com.docker.compose.service=main'],text=True,timeout=15).split()
+        ids=list(dict.fromkeys(ids))
+        if len(ids)!=1:raise AutorError('Missing or ambiguous rebuilt trial image: '+project)
+        row=json.loads(subprocess.check_output(['docker','image','inspect',ids[0]],text=True,timeout=15))[0]
+        actual=image_content_digest(row)
+        if actual!=item['content_sha256']:
+            raise AutorError('Rebuilt task image content changed: '+task+suffix)
+        checked.append({'project_suffix':suffix,'image_id':row['Id'],'content_sha256':actual})
+    return checked
+
+
 def cleanup_owned(work):
-    """Only remove containers labelled with this evaluation's generated trial projects."""
+    """Remove agent and separate verifier containers for these exact trial prefixes."""
+    trials=[p.name.lower() for p in (Path(work)/'jobs/evaluation').glob('*') if p.is_dir()]
+    rows=subprocess.check_output(['docker','ps','-a','--filter','label=com.docker.compose.project',
+        '--format','{{.ID}} {{.Label "com.docker.compose.project"}}'],text=True,timeout=5)
     removed=[]
-    for trial in (Path(work)/'jobs/evaluation').glob('*'):
-        if not trial.is_dir():continue
-        project=trial.name.lower()+'__env'
-        ids=subprocess.check_output(['docker','ps','-aq','--filter',
-            'label=com.docker.compose.project='+project],text=True,timeout=5).split()
-        if ids:
-            subprocess.run(['docker','rm','-f',*ids],check=True,capture_output=True,timeout=10)
-            removed.extend(ids)
+    for line in rows.splitlines():
+        fields=line.split()
+        if len(fields)!=2:continue
+        ident,project=fields
+        if any(project==t+'__env' or project.startswith(t+'__verifier__') for t in trials):
+            removed.append(ident)
+    if removed:
+        subprocess.run(['docker','rm','-f',*removed],check=True,capture_output=True,timeout=10)
     return removed
 
 
@@ -101,6 +135,8 @@ def run(args):
     prompt_hash=sha(harness/'prompt.md')
     job=read_json(pilot/'search-job.json');job['jobs_dir']=str(work/'jobs')
     job['agents'][0]['kwargs']['prompt_template_path']=str(harness/'prompt.md')
+    # Keep build images for post-run content checks; Compose down still removes containers.
+    job['environment']['delete']=False
     write_json(work/'job.json',job)
     try:
         seconds=run_process(['harbor','run','--config',str(work/'job.json')],work,work/'harbor-logs',args.timeout-30)
@@ -116,6 +152,7 @@ def run(args):
             full_feedback=(trial/'verifier/test-stdout.txt').read_text(errors='replace')
             if invalid_verifier_feedback(full_feedback):
                 raise AutorError('Verifier infrastructure failure: '+task['task_id'])
+            task['image_checks']=verify_trial_images(trial,read_json(args.images),task['task_id'])
             task['activation']=verify_activation(trial,harness,instructions[task['task_id']])
             log=trial/'agent/codex.txt'
             if log.exists():
