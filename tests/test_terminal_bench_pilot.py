@@ -11,6 +11,17 @@ from autor.storage import AutorError, read_json, write_json
 
 
 class TerminalBenchPilotTests(unittest.TestCase):
+    def test_agent_platform_is_frozen(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "pilot"
+            pilot.prepare(root, "fixture", "0.153.4", "a" * 64, docker_platform="linux/amd64")
+            overlay = root / "runtime/docker-platform.yaml"
+            self.assertEqual(read_json(root / "search-job.json")["environment"]["extra_docker_compose"], [str(overlay.resolve())])
+            pilot.load(root)
+            overlay.write_text("services: {}")
+            with self.assertRaisesRegex(AutorError, "runtime override changed"):
+                pilot.load(root)
+
     def test_dependency_cache_is_frozen_and_privately_copied(self):
         with tempfile.TemporaryDirectory() as temp:
             base = Path(temp)

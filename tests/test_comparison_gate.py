@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+from scripts import compare_search
 from autor.storage import AutorError, write_json
 from scripts.compare_search import natural_failure
 
@@ -42,3 +44,35 @@ class NaturalFailureGateTests(unittest.TestCase):
             'collected 3 items\nrosetta error: Unable to open /proc/self/exe: 2\n'
             'FAILED test_image_similarity - subprocess.CalledProcessError\n')
         with self.assertRaisesRegex(AutorError,'infrastructure failure'):natural_failure(self.trial)
+
+
+class BaselineOrchestrationTests(unittest.TestCase):
+    def run_gate(self, first):
+        state={'proposals_used':0,'candidates':[{'status':'evaluated','hash':'same','score':0,
+            'task_scores':[{'task_id':'fixture','score':0,'trial_dir':'unused'}]}],
+            'task_checksums':[['fixture','checksum']]}
+        import copy
+        initial=copy.deepcopy(state);initial.update(first)
+        with tempfile.TemporaryDirectory() as temp, patch.object(compare_search,'check',return_value={
+                'failure_gate':{'task':'fixture','task_checksum':'checksum'}}), patch.object(
+                compare_search.engine,'load',return_value=state), patch.object(
+                compare_search.engine,'Experiment') as experiment, patch.object(
+                compare_search,'natural_failure'), patch.object(compare_search,'summary',return_value={}):
+            experiment.return_value.run.side_effect=[initial,state,state]
+            result=compare_search.baselines(Path(temp))
+            return result, experiment.call_count
+
+    def test_interrupt_does_not_start_next_arm(self):
+        gate,calls=self.run_gate({'stop_reason':'interrupted'})
+        self.assertFalse(gate['allowed']);self.assertEqual(calls,1)
+        self.assertEqual(gate['not_run_arms'],['B','C'])
+
+    def test_ceiling_does_not_start_next_arm(self):
+        gate,calls=self.run_gate({'candidates':[{'status':'evaluated','hash':'same','score':1,
+            'task_scores':[{'task_id':'fixture','score':1}]}]})
+        self.assertFalse(gate['allowed']);self.assertEqual(calls,1)
+
+    def test_valid_reproduction_runs_all_three_arms(self):
+        gate,calls=self.run_gate({})
+        self.assertTrue(gate['allowed']);self.assertEqual(calls,3)
+        self.assertEqual(gate['not_run_arms'],[])

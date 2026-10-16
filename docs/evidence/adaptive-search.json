@@ -1,15 +1,15 @@
 {
   "date": "2026-10-16",
   "version": "0.2.0.dev2",
-  "status": "real-baseline-reproduction-running",
+  "status": "baseline-gate-blocked-continue-harder-screening",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
   "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
   "comparison_runner_sha256": "700173f6f19d824acf8b94f170873d40c58ceeb91fadf2e9460c740fbf6a18b9",
   "tests": {
-    "passed": 96,
+    "passed": 100,
     "python": "3.12",
     "harbor": "0.24.0",
-    "log_sha256": "3152816ba4a0e69a0268c390918b21cc47118446a1e80d96af7e7f4550290e32"
+    "log_sha256": "e63c49e78b69215bc9f2fdae6ad0928555667479bc7460dda471d5c877a67173"
   },
   "synthetic_comparison": {
     "synthetic": true,
@@ -470,9 +470,9 @@
   },
   "real_comparison": {
     "started": true,
-    "reason": "Natural failure gate passed; fresh A/B/C seed measurements are running before any proposal.",
+    "reason": "Selected natural failure passed spontaneously in B; baseline gate closed before proposals.",
     "holdout_evaluated": false,
-    "phase": "baseline-reproduction",
+    "phase": "stopped-reproduction-failed",
     "selected_tasks": [
       "torch-pipeline-parallelism",
       "fix-git"
@@ -487,7 +487,17 @@
       "proposal_timeout": 120,
       "evaluation_timeout": 900
     },
-    "max_task_trials_per_arm": 16
+    "max_task_trials_per_arm": 16,
+    "proposals_used": 0,
+    "accepted_A_score": 0.5,
+    "B_completed_raw_trial_scores": {
+      "torch-pipeline-parallelism": 1,
+      "fix-git": 1
+    },
+    "B_accepted_score": null,
+    "C_status": "interrupted-reserved-attempt-no-accepted-measurement",
+    "cancellation_bug": "Old runner continued after engine returned interrupted; now stops later arms on interruption or failed reproduction.",
+    "baseline_gate_sha256": "873ffc4f8180c44a52eb65b090b38407e7409f4251ed7a6f1295c4958efeae11"
   },
   "limitations": [
     "Synthetic scores are assigned fixtures, not measured harness improvement.",
@@ -697,5 +707,9 @@
       "private_write_checked": true
     },
     "limitations": "The cache is not a hermetic dependency lock; task-owned installation scripts may still consult package indexes."
+  },
+  "current_runner": {
+    "sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
+    "old_experiment_not_resumable_after_fix": true
   }
 }

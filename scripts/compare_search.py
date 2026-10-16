@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import signal
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from autor import engine
@@ -98,13 +99,14 @@ def baselines(root):
     root=Path(root);plan=check(root);states={}
     if any(engine.load(root/name)['proposals_used'] for name in ['A','B','C']):
         raise AutorError('Cannot re-open the baseline gate after search started')
-    for name in ['A','B','C']:
-        states[name]=engine.Experiment(root/name).run(0)
     reasons=[];checksums=[]
-    for name,state in states.items():
+    for name in ['A','B','C']:
+        state=engine.Experiment(root/name).run(0)
+        states[name]=state
         seed=state['candidates'][0]
         samples=seed.get('samples') or [{'score':seed.get('score'),'tasks':seed.get('task_scores',[])}]
-        if seed['status']!='evaluated':reasons.append(name+': invalid seed measurement');continue
+        if state.get('stop_reason')=='interrupted' or seed['status']!='evaluated':
+            reasons.append(name+': interrupted or invalid seed measurement');break
         if any(sample['score']>=1 for sample in samples):reasons.append(name+': seed reached ceiling; failure is not consistently reproduced')
         if any(not any(t['task_id']==plan['failure_gate']['task'] and t['score']<1 for t in sample['tasks']) for sample in samples):
             reasons.append(name+': selected natural failure did not recur in every seed sample')
@@ -117,11 +119,15 @@ def baselines(root):
         checksums.append(state['task_checksums'])
         if dict(state['task_checksums']).get(plan['failure_gate']['task'])!=plan['failure_gate']['task_checksum']:
             reasons.append(name+': failure task contents differ from screening')
-    if checksums and any(x!=checksums[0] for x in checksums):reasons.append('Task content differs across arms')
-    gate={'allowed':not reasons,'reasons':reasons,'seed_hashes':{n:s['candidates'][0]['hash'] for n,s in states.items()},
+        if checksums and any(x!=checksums[0] for x in checksums):
+            reasons.append('Task content differs across arms')
+        if len({s['candidates'][0]['hash'] for s in states.values()})>1:
+            reasons.append('Seed harnesses differ')
+        if reasons:break
+    gate={'allowed':not reasons and len(states)==3,'reasons':reasons,
+          'not_run_arms':[n for n in ['A','B','C'] if n not in states],'seed_hashes':{n:s['candidates'][0]['hash'] for n,s in states.items()},
           'seed_results':{n:summary(s) for n,s in states.items()},
           'seed_state_hashes':{n:digest(s) for n,s in states.items()}}
-    if len(set(gate['seed_hashes'].values()))!=1:gate['allowed']=False;gate['reasons'].append('Seed harnesses differ')
     write_json(root/'baseline-gate.json',gate)
     return gate
 
@@ -139,8 +145,10 @@ def search(root):
         completed=sum(len(s['tasks']) for c in state['candidates'] for s in c.get('samples',[])) if name!='A' else sum(len(c.get('task_scores',[])) for c in state['candidates'] if c['status']=='evaluated')
         results[name]={**summary(state),'reserved_task_trials':state['evaluations_used']*len(plan['tasks']),
                        'completed_valid_task_trials':completed}
-        write_json(root/'comparison.json',{'status':'running' if name!='C' else 'complete',
+        interrupted=state.get('stop_reason')=='interrupted'
+        write_json(root/'comparison.json',{'status':'interrupted' if interrupted else ('running' if name!='C' else 'complete'),
                    'plan_hash':digest(plan),'holdout_evaluated':False,'results':results})
+        if interrupted:break
     return results
 
 
@@ -153,7 +161,12 @@ def parser():
     return p
 
 
+def terminate(signum, frame):
+    raise KeyboardInterrupt
+
+
 if __name__=='__main__':
+    signal.signal(signal.SIGTERM, terminate)
     args=parser().parse_args()
     result=prepare(args) if args.command=='prepare' else (baselines(args.root) if args.command=='baselines' else search(args.root))
     print(json.dumps(result,ensure_ascii=False))

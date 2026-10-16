@@ -54,7 +54,7 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
             task_names=None, agent_timeout=180, max_seconds=1200, apt_proxy=None, network_proxy=None,
             task_git_url="https://github.com/harbor-framework/terminal-bench-2.git",
             task_revision=REVISION, task_prefix="", dataset_version="2.0", task_name_prefix="",
-            dependency_cache=None):
+            dependency_cache=None, docker_platform=None):
     root = Path(root).resolve()
     if root.exists():
         raise AutorError("Choose a new pilot directory")
@@ -92,6 +92,8 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
                 or parsed.username or parsed.password or parsed.query or parsed.fragment
                 or parsed.path not in ("", "/") or any(c.isspace() for c in proxy)):
             raise AutorError("Proxy must be an HTTP(S) origin without credentials")
+    if docker_platform not in (None, "linux/amd64", "linux/arm64"):
+        raise AutorError("Docker platform must be linux/amd64 or linux/arm64")
     harness = root / "harness"
     harness.mkdir(parents=True)
     (harness / "prompt.md").write_text(SEED_PROMPT, encoding="utf-8")
@@ -106,6 +108,12 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
                      "git_commit_id": task_revision, "source": "terminal-bench-" + dataset_version + "-pilot"} for name in tasks]
     job["agents"][0]["kwargs"]["reasoning_effort"] = "low"
     overrides = {}
+    if docker_platform:
+        platform_path = root / "runtime/docker-platform.yaml"
+        platform_path.parent.mkdir(parents=True, exist_ok=True)
+        platform_path.write_text("services:\n  main:\n    platform: " + docker_platform + "\n")
+        overrides["runtime/docker-platform.yaml"] = hashlib.sha256(platform_path.read_bytes()).hexdigest()
+        job["environment"]["extra_docker_compose"] = [str(platform_path)]
     if bounded_apt:
         apt_path = root / "runtime/apt-network.conf"
         apt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -183,7 +191,7 @@ def load(root):
     for name, expected in metadata.get("runtime_overrides", {}).items():
         if name in ("runtime/node", "runtime/uv-cache"):
             actual = runtime_digest(root / name)
-        elif name in ("runtime/apt-network.conf", "runtime/node-profile.sh"):
+        elif name in ("runtime/apt-network.conf", "runtime/node-profile.sh", "runtime/docker-platform.yaml"):
             actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
         else:
             raise AutorError("Unknown runtime override")
@@ -253,6 +261,7 @@ def main():
     init.add_argument("--inner-version", required=True)
     init.add_argument("--holdout-commitment", required=True)
     init.add_argument("--node-runtime", type=Path, help="Stage a trusted extracted Linux Node distribution as a hashed read-only runtime mount")
+    init.add_argument("--docker-platform", choices=["linux/amd64", "linux/arm64"], help="Freeze agent image architecture; separate verifier keeps its native platform")
     init.add_argument("--dependency-cache", type=Path, help="Stage an audited third-party uv wheel cache; cloned privately inside each container")
     init.add_argument("--bounded-apt", action="store_true", help="Freeze an APT 15-second connection timeout with no retries; recorded runtime deviation")
     init.add_argument("--apt-proxy", help="Optional credential-free proxy origin reachable from the container; requires --bounded-apt and is frozen in the runtime receipt")
@@ -273,7 +282,7 @@ def main():
             result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment,
                              args.bounded_apt, args.node_runtime, args.task, args.agent_timeout, args.max_seconds,
                              args.apt_proxy, args.network_proxy, args.task_git_url, args.task_revision,
-                             args.task_prefix, args.dataset_version, args.task_name_prefix, args.dependency_cache)
+                             args.task_prefix, args.dataset_version, args.task_name_prefix, args.dependency_cache, args.docker_platform)
         elif args.command == "check":
             result = preflight(args.root)
             write_json(args.root / "preflight.json", result)

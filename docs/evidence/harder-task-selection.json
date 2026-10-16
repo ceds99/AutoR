@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-16",
+  "status": "screening-running",
+  "source": {
+    "repository": "https://github.com/harbor-framework/terminal-bench.git",
+    "revision": "452bf305c6daa62fc59061d22133a7cbc7c1572e",
+    "version": "4.0.0"
+  },
+  "selected_tasks": [
+    "terminal-bench/batched-eval-parity",
+    "terminal-bench/session-window-debug"
+  ],
+  "inner": {
+    "model": "openai/gpt-6-astra",
+    "reasoning_effort": "low",
+    "codex_npm": "0.153.4",
+    "seed_unchanged": true
+  },
+  "agent_timeout_seconds": 900,
+  "pilot_max_seconds": 3000,
+  "holdout_count": 2,
+  "holdout_commitment": "f2f4f0c95a3532de4b26f271c30c10f7e3e0855c9f8af738ef96a2bc20223209",
+  "holdout_evaluated": false,
+  "proposer_calls": 0,
+  "runtime": {
+    "agent_platform": "linux/amd64",
+    "separate_verifier_platform": "native linux/arm64 (verify from built image receipt)",
+    "buildx": "v0.38.0",
+    "buildx_binary_sha256": "85989b895add5f119c1ccf8eada2f6892fc33ccf16bd8917638eae404ef26344"
+  },
+  "limitations": [
+    "Bounded pilot, not official leaderboard settings.",
+    "Fresh benchmark version; scores are not pooled with TB2.",
+    "No hidden tests or solution source supplied to outer."
+  ]
+}

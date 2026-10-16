@@ -326,7 +326,7 @@ A/B/C 合成检查使用相同预算上限；脚本指定分数，只验证调�
 
 为对照建立固定位置的 Python 3.12 venv 并安装 `harbor==0.24.0`，保存依赖版本清单。用该 venv 的 Python 执行 prepare、baselines 和 search，并将其 bin 放到 PATH 前端。prepare 会冻结 Python 的绝对路径，因此不要使用可能被清理的临时 `uv run --with` 环境。评测桥会分别检查 Harbor CLI 和 Python 包版本；outer 的 Codex 路径、版本与 inner 的版本分别固定。
 
-每组最多 6 次提案、8 次完整任务集评测、2400 秒累计调用时间，复测与失败计入同一上限；记录实际用量。40 分钟上限在正式对照冻结前，根据自然失败试验的耗时及缓存预检确定，不在运行中追加。A 使用 beam；B 使用 adaptive_beam；C 开启 mixing。baseline 不复现失败时，`search` 拒绝启动。若时间预算提前耗尽，报告未完成阶段，不能声称混合或效果已经得到验证。
+每组最多 6 次提案、8 次完整任务集评测、2400 秒累计调用时间，复测与失败计入同一上限；记录实际用量。40 分钟上限在正式对照冻结前，根据自然失败试验的耗时及缓存预检确定，不在运行中追加。A 使用 beam；B 使用 adaptive_beam；C 开启 mixing。baseline 中任一组中断、测量无效或未复现失败时，立即停止启动后续组，`search` 拒绝启动。若时间预算提前耗尽，报告未完成阶段，不能声称混合或效果已经得到验证。
 
 JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`children_per_parent`、`confirmation_samples`（2–4）和 `mixing`（布尔值）。复测中断后继续用 `autor run`；程序只接纳已落盘的独立结果，不重放不确定调用。`needs_confirmation` 表示预算耗尽前尚未完成确认，不能当作最佳候选。原始样本在 `measurements/`，`evaluation.json` 是派生的逐题平均值。
 
@@ -336,4 +336,6 @@ JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`
 
 依赖预热可用 `nop` agent，不调用模型；其分数不得作为 baseline 或自然失败证据。若需在完成后提取缓存，Docker 环境要显式设置 `environment.kwargs.keep_containers: true`。Harbor 0.24.0 的 `environment.delete: false` 仍会移除容器，只保留部分其他资源，不能用来保留容器缓存。提取审计后只清理本次预热的容器。
 
-任务来源可通过 `--task-git-url`、`--task-revision`、`--task-prefix`、`--task-name-prefix`、`--dataset-version` 固定。revision 必须是完整 commit；目录前缀与 task.toml 中的任务名空间分别记录。当前真实筛选仍来自固定的 Terminal-Bench 2.0 commit。已查看 [Terminal-Bench 4.0 官方更新](https://www.tbench.ai/news/terminal-bench-4-0)及部分公开任务元数据，但尚未完成本机运行验证，也未把新版成绩混入当前对照。
+任务来源可通过 `--task-git-url`、`--task-revision`、`--task-prefix`、`--task-name-prefix`、`--dataset-version` 固定。revision 必须是完整 commit；目录前缀与 task.toml 中的任务名空间分别记录。旧对照来自 Terminal-Bench 2.0。新筛选单独固定 Terminal-Bench 4.0 的 `452bf305c6daa62fc59061d22133a7cbc7c1572e`，目录前缀为 `tasks/`、任务名空间为 `terminal-bench/`。版本之间不拼接 baseline。详见 [Terminal-Bench 4.0 官方更新](https://www.tbench.ai/news/terminal-bench-4-0)。
+
+ARM 宿主使用已有 x86 inner 运行时，可通过 `--docker-platform linux/amd64` 冻结 agent Compose overlay；需安装支持平台选择的 Docker Buildx，并检查实际镜像架构。独立 verifier 保持其原生架构，必须另记镜像回执；同一对照各组固定相同运行条件。该选项不会修改任务 Dockerfile、评分器或任务时间限制；pilot 的 agent 上限仍须显式记录。
