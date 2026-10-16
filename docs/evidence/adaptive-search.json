@@ -1,7 +1,7 @@
 {
   "date": "2026-10-16",
   "version": "0.2.0.dev2",
-  "status": "second-reproduction-gate-closed-continue-screening",
+  "status": "cargo-baseline-reproduction-running",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
   "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b",
   "comparison_runner_sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
@@ -469,18 +469,15 @@
     }
   },
   "real_comparison": {
-    "name": "abc-search-002",
+    "name": "abc-search-003",
     "started": true,
-    "phase": "stopped-reproduction-failed",
-    "reason": "Selected screening failure passed all five tests in A; cancel remaining work before proposals.",
-    "holdout_evaluated": false,
+    "phase": "baseline-reproduction",
     "selected_tasks": [
-      "terminal-bench/batched-eval-parity",
-      "terminal-bench/wal-recovery-ordering"
+      "terminal-bench/cargo-flight-dispatch",
+      "terminal-bench/batched-eval-parity"
     ],
-    "screening_evidence": "harder-task-selection.json",
     "search_started": false,
-    "plan_hash": "493316b75e4e8e541a114ec5380162c503b9fd82af959751d16e01c6fe543f92",
+    "plan_hash": "44cbf73efc7638ec18906261028e09a29740012e4b963374319100df64bd7651",
     "budget_per_arm": {
       "max_proposals": 6,
       "max_evaluations": 8,
@@ -489,32 +486,8 @@
       "evaluation_timeout": 900
     },
     "max_task_trials_per_arm": 16,
-    "proposals_used": 0,
-    "accepted_A_score": null,
-    "A_completed_selected_task_score": 1,
-    "A_remaining_task": "cancelled after selected failure passed",
-    "B_started": false,
-    "C_started": false,
-    "baseline_gate_sha256": "5153ff35ee970bc9c5c69cc6a06a29cea1427a1dc64c39469f9d24147fcf2581",
-    "selected_trial_image_checks": [
-      {
-        "project_suffix": "__env",
-        "image_id": "sha256:a12d8d498cb19b49ee4e8bafdcdb2d79da273f75abe4339f8286b3ac5fb89faa",
-        "content_sha256": "d1f63f51ae5bfd91a0255bf2224968bc577f29b2d9147a46fba15ce91c5b7b4d"
-      },
-      {
-        "project_suffix": "__verifier__trial",
-        "image_id": "sha256:0184da3dc3e10a30349cfa9a1e63bf39062c368d4ce890c29aa1dfae070020c3",
-        "content_sha256": "eb780b312734ddf1f9eef2f5497399d0b9bd124c85cb14add4cb783a57345003"
-      }
-    ],
-    "selected_trial_activation": {
-      "file": "prompt.md",
-      "sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
-      "used": true,
-      "rendered_prompt_sha256": "eda786e993e619e495e558a1b4ee139868c5e1d8b60ebc79025f1c6a4af02d3c",
-      "method": "Exact rendered prompt matched in the executed Codex command log"
-    }
+    "holdout_evaluated": false,
+    "reason": "Cargo screening produced eight concrete assertion failures; all arms must reproduce the selected failure before proposals."
   },
   "limitations": [
     "Synthetic scores are assigned fixtures, not measured harness improvement.",
@@ -764,6 +737,54 @@
       "name": "abc-search-001",
       "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
       "runner_sha256": "700173f6f19d824acf8b94f170873d40c58ceeb91fadf2e9460c740fbf6a18b9"
+    },
+    {
+      "name": "abc-search-002",
+      "started": true,
+      "phase": "stopped-reproduction-failed",
+      "reason": "Selected screening failure passed all five tests in A; cancel remaining work before proposals.",
+      "holdout_evaluated": false,
+      "selected_tasks": [
+        "terminal-bench/batched-eval-parity",
+        "terminal-bench/wal-recovery-ordering"
+      ],
+      "screening_evidence": "harder-task-selection.json",
+      "search_started": false,
+      "plan_hash": "493316b75e4e8e541a114ec5380162c503b9fd82af959751d16e01c6fe543f92",
+      "budget_per_arm": {
+        "max_proposals": 6,
+        "max_evaluations": 8,
+        "max_seconds": 2400,
+        "proposal_timeout": 120,
+        "evaluation_timeout": 900
+      },
+      "max_task_trials_per_arm": 16,
+      "proposals_used": 0,
+      "accepted_A_score": null,
+      "A_completed_selected_task_score": 1,
+      "A_remaining_task": "cancelled after selected failure passed",
+      "B_started": false,
+      "C_started": false,
+      "baseline_gate_sha256": "5153ff35ee970bc9c5c69cc6a06a29cea1427a1dc64c39469f9d24147fcf2581",
+      "selected_trial_image_checks": [
+        {
+          "project_suffix": "__env",
+          "image_id": "sha256:a12d8d498cb19b49ee4e8bafdcdb2d79da273f75abe4339f8286b3ac5fb89faa",
+          "content_sha256": "d1f63f51ae5bfd91a0255bf2224968bc577f29b2d9147a46fba15ce91c5b7b4d"
+        },
+        {
+          "project_suffix": "__verifier__trial",
+          "image_id": "sha256:0184da3dc3e10a30349cfa9a1e63bf39062c368d4ce890c29aa1dfae070020c3",
+          "content_sha256": "eb780b312734ddf1f9eef2f5497399d0b9bd124c85cb14add4cb783a57345003"
+        }
+      ],
+      "selected_trial_activation": {
+        "file": "prompt.md",
+        "sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+        "used": true,
+        "rendered_prompt_sha256": "eda786e993e619e495e558a1b4ee139868c5e1d8b60ebc79025f1c6a4af02d3c",
+        "method": "Exact rendered prompt matched in the executed Codex command log"
+      }
     }
   ]
 }

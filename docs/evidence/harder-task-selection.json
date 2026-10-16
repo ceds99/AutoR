@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "status": "natural-failure-did-not-recur-screening-more-tasks",
+  "status": "cargo-natural-failure-found-third-baseline-gate-running",
   "source": {
     "repository": "https://github.com/harbor-framework/terminal-bench.git",
     "revision": "452bf305c6daa62fc59061d22133a7cbc7c1572e",
@@ -103,6 +103,24 @@
       "determinism_rounds": 10,
       "trial": "wal-recovery-ordering__yr7thtg",
       "result_sha256": "e79f2e4b8176fe5c483ab82aa7c05aaaabc305ea8447d73b6b2f14a8d8a93df1"
+    },
+    {
+      "task": "terminal-bench/cargo-flight-dispatch",
+      "score": 0,
+      "classification": "valid-natural-failure",
+      "passed_tests": 19,
+      "failed_tests": 8,
+      "trial": "cargo-flight-dispatch__V8zteQe",
+      "result_sha256": "1b86b1c5a3660fdcfff39b0d42ab7c915dd4f2176c23d292521316447707ed94"
+    },
+    {
+      "task": "terminal-bench/fin-saccr-rwa",
+      "score": 1,
+      "classification": "valid-pass",
+      "passed_tests": 24,
+      "failed_tests": 0,
+      "trial": "fin-saccr-rwa__cReVYCt",
+      "result_sha256": "0e160752ff554165502a8bd67cdecab6a41d1cf0e5bd7c67159c1c4a0dbead68"
     }
   ],
   "failure_receipt": {
@@ -128,8 +146,8 @@
     "verifier_stdout_sha256": "79646aa140afe0df500ed70f985a2e15927c50d96ace7551415b84078b1d2db7"
   },
   "formal_comparison_tasks": [
-    "terminal-bench/batched-eval-parity",
-    "terminal-bench/wal-recovery-ordering"
+    "terminal-bench/cargo-flight-dispatch",
+    "terminal-bench/batched-eval-parity"
   ],
   "formal_image_receipts": [
     {
@@ -149,20 +167,20 @@
       "content_sha256": "eb780b312734ddf1f9eef2f5497399d0b9bd124c85cb14add4cb783a57345003"
     },
     {
-      "task": "terminal-bench/wal-recovery-ordering",
-      "image": "wal-recovery-ordering__yr7thtg__env-main",
-      "id": "sha256:44583825be8fc7220950e7baff4e8e41b0e6c4442ddc07882934b102c11cacb9",
+      "task": "terminal-bench/cargo-flight-dispatch",
+      "image": "cargo-flight-dispatch__v8zteqe__env-main",
+      "id": "sha256:f211874a0b3e2a2908ef9aa9631c3332499729f8a3b8535bdfeaf84908c7b477",
       "architecture": "amd64",
       "project_suffix": "__env",
-      "content_sha256": "d580421615dd54141385807909f00ff232155652cd88710686623128fce9ca5d"
+      "content_sha256": "155348c5a19fefde75b8728a8c4524ba009925b2027b800d64f1afe9c7edd42f"
     },
     {
-      "task": "terminal-bench/wal-recovery-ordering",
-      "image": "wal-recovery-ordering__yr7thtg__verifier__trial-main",
-      "id": "sha256:f4f6746ea26df411208f521bbb52cfa9c3ffd597a02317cac08bb47ac5a3041e",
+      "task": "terminal-bench/cargo-flight-dispatch",
+      "image": "cargo-flight-dispatch__v8zteqe__verifier__trial-main",
+      "id": "sha256:865eb109afccff7b1d63e55e7cbf4644c8aca909b5323e7c6dd6d130eec7910f",
       "architecture": "arm64",
       "project_suffix": "__verifier__trial",
-      "content_sha256": "da088155a9f4e21b855520151bdd78dea09e8a47e14ca050c8a5cb24b0bd6101"
+      "content_sha256": "7450dababbbc7e0344d2b3f51676d77a83361807c04b084a3b72d94248256aee"
     }
   ],
   "reproduction_observation": {
@@ -173,5 +191,6 @@
     "same_image_contents": true,
     "seed_prompt_verified": true,
     "no_accepted_aggregate": true
-  }
+  },
+  "selection_reason": "Cargo has eight concrete assertion failures; batched evaluation gives a second task at lower cost than the ~8-minute finance agent or 10-round WAL verifier."
 }
