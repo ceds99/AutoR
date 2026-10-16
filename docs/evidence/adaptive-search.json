@@ -1,10 +1,10 @@
 {
   "date": "2026-10-16",
   "version": "0.2.0.dev2",
-  "status": "baseline-gate-blocked-continue-harder-screening",
+  "status": "harder-task-baseline-reproduction-running",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
-  "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
-  "comparison_runner_sha256": "700173f6f19d824acf8b94f170873d40c58ceeb91fadf2e9460c740fbf6a18b9",
+  "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b",
+  "comparison_runner_sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
   "tests": {
     "passed": 102,
     "python": "3.12",
@@ -469,17 +469,18 @@
     }
   },
   "real_comparison": {
+    "name": "abc-search-002",
     "started": true,
-    "reason": "Selected natural failure passed spontaneously in B; baseline gate closed before proposals.",
+    "phase": "baseline-reproduction",
+    "reason": "TB4 screening found concrete semantic assertion failures; fresh A/B/C seed measurements required.",
     "holdout_evaluated": false,
-    "phase": "stopped-reproduction-failed",
     "selected_tasks": [
-      "torch-pipeline-parallelism",
-      "fix-git"
+      "terminal-bench/batched-eval-parity",
+      "terminal-bench/wal-recovery-ordering"
     ],
-    "screening_evidence": "hard-task-selection.json",
+    "screening_evidence": "harder-task-selection.json",
     "search_started": false,
-    "plan_hash": "79edc9691404da234a68c47f7964639a0a3f1e6bbacd248d5bf4fce351cbbdf2",
+    "plan_hash": "493316b75e4e8e541a114ec5380162c503b9fd82af959751d16e01c6fe543f92",
     "budget_per_arm": {
       "max_proposals": 6,
       "max_evaluations": 8,
@@ -487,17 +488,7 @@
       "proposal_timeout": 120,
       "evaluation_timeout": 900
     },
-    "max_task_trials_per_arm": 16,
-    "proposals_used": 0,
-    "accepted_A_score": 0.5,
-    "B_completed_raw_trial_scores": {
-      "torch-pipeline-parallelism": 1,
-      "fix-git": 1
-    },
-    "B_accepted_score": null,
-    "C_status": "interrupted-reserved-attempt-no-accepted-measurement",
-    "cancellation_bug": "Old runner continued after engine returned interrupted; now stops later arms on interruption or failed reproduction.",
-    "baseline_gate_sha256": "873ffc4f8180c44a52eb65b090b38407e7409f4251ed7a6f1295c4958efeae11"
+    "max_task_trials_per_arm": 16
   },
   "limitations": [
     "Synthetic scores are assigned fixtures, not measured harness improvement.",
@@ -712,5 +703,41 @@
     "sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
     "old_experiment_not_resumable_after_fix": true,
     "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b"
-  }
+  },
+  "previous_comparison_attempts": [
+    {
+      "started": true,
+      "reason": "Selected natural failure passed spontaneously in B; baseline gate closed before proposals.",
+      "holdout_evaluated": false,
+      "phase": "stopped-reproduction-failed",
+      "selected_tasks": [
+        "torch-pipeline-parallelism",
+        "fix-git"
+      ],
+      "screening_evidence": "hard-task-selection.json",
+      "search_started": false,
+      "plan_hash": "79edc9691404da234a68c47f7964639a0a3f1e6bbacd248d5bf4fce351cbbdf2",
+      "budget_per_arm": {
+        "max_proposals": 6,
+        "max_evaluations": 8,
+        "max_seconds": 2400,
+        "proposal_timeout": 120,
+        "evaluation_timeout": 900
+      },
+      "max_task_trials_per_arm": 16,
+      "proposals_used": 0,
+      "accepted_A_score": 0.5,
+      "B_completed_raw_trial_scores": {
+        "torch-pipeline-parallelism": 1,
+        "fix-git": 1
+      },
+      "B_accepted_score": null,
+      "C_status": "interrupted-reserved-attempt-no-accepted-measurement",
+      "cancellation_bug": "Old runner continued after engine returned interrupted; now stops later arms on interruption or failed reproduction.",
+      "baseline_gate_sha256": "873ffc4f8180c44a52eb65b090b38407e7409f4251ed7a6f1295c4958efeae11",
+      "name": "abc-search-001",
+      "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
+      "runner_sha256": "700173f6f19d824acf8b94f170873d40c58ceeb91fadf2e9460c740fbf6a18b9"
+    }
+  ]
 }

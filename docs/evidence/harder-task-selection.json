@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "status": "natural-failure-found-screening-replacement",
+  "status": "screening-complete-fresh-baselines-running",
   "source": {
     "repository": "https://github.com/harbor-framework/terminal-bench.git",
     "revision": "452bf305c6daa62fc59061d22133a7cbc7c1572e",
@@ -92,6 +92,15 @@
       "failed_tests": 1,
       "feedback": "privilege-dropped worker did not report success; no internal exception detail",
       "trial": "session-window-debug__tUhYWMR"
+    },
+    {
+      "task": "terminal-bench/wal-recovery-ordering",
+      "score": 1,
+      "classification": "valid-pass",
+      "passed_tests_per_round": 97,
+      "determinism_rounds": 10,
+      "trial": "wal-recovery-ordering__yr7thtg",
+      "result_sha256": "e79f2e4b8176fe5c483ab82aa7c05aaaabc305ea8447d73b6b2f14a8d8a93df1"
     }
   ],
   "failure_receipt": {
@@ -115,5 +124,43 @@
     "result_sha256": "213bb780ec7691eb9d965057d9f73797e2f8283e71dc18ed1dcd6c8cb75f27ac",
     "agent_log_sha256": "e7492e5ca120bf5e11a7fd81343090815fbae873a342b772dbb4f0be8aff312a",
     "verifier_stdout_sha256": "79646aa140afe0df500ed70f985a2e15927c50d96ace7551415b84078b1d2db7"
-  }
+  },
+  "formal_comparison_tasks": [
+    "terminal-bench/batched-eval-parity",
+    "terminal-bench/wal-recovery-ordering"
+  ],
+  "formal_image_receipts": [
+    {
+      "task": "terminal-bench/batched-eval-parity",
+      "image": "batched-eval-parity__g5kfuxk__env-main",
+      "id": "sha256:aa51a8c12b9a5c6c13c37bff92f0a51c28142381e523dc64e3a3ab12d6f83b22",
+      "architecture": "amd64",
+      "project_suffix": "__env",
+      "content_sha256": "d1f63f51ae5bfd91a0255bf2224968bc577f29b2d9147a46fba15ce91c5b7b4d"
+    },
+    {
+      "task": "terminal-bench/batched-eval-parity",
+      "image": "batched-eval-parity__g5kfuxk__verifier__trial-main",
+      "id": "sha256:fe0ae8fd4ab5339207e408bab5522f210f82fede8272f426e85cf6694775343e",
+      "architecture": "arm64",
+      "project_suffix": "__verifier__trial",
+      "content_sha256": "eb780b312734ddf1f9eef2f5497399d0b9bd124c85cb14add4cb783a57345003"
+    },
+    {
+      "task": "terminal-bench/wal-recovery-ordering",
+      "image": "wal-recovery-ordering__yr7thtg__env-main",
+      "id": "sha256:44583825be8fc7220950e7baff4e8e41b0e6c4442ddc07882934b102c11cacb9",
+      "architecture": "amd64",
+      "project_suffix": "__env",
+      "content_sha256": "d580421615dd54141385807909f00ff232155652cd88710686623128fce9ca5d"
+    },
+    {
+      "task": "terminal-bench/wal-recovery-ordering",
+      "image": "wal-recovery-ordering__yr7thtg__verifier__trial-main",
+      "id": "sha256:f4f6746ea26df411208f521bbb52cfa9c3ffd597a02317cac08bb47ac5a3041e",
+      "architecture": "arm64",
+      "project_suffix": "__verifier__trial",
+      "content_sha256": "da088155a9f4e21b855520151bdd78dea09e8a47e14ca050c8a5cb24b0bd6101"
+    }
+  ]
 }
