@@ -71,7 +71,7 @@ def prepare(args):
             '--images',str(root/'images.json'),'--images-sha256',sha(root/'images.json'),
             '--support-sha256',support_hash(),'--harness','{harness}','--work','{work}',
             '--result','{result}','--timeout','{timeout}']}
-    common['budget']={'max_proposals':6,'max_evaluations':8,'max_seconds':1800,
+    common['budget']={'max_proposals':6,'max_evaluations':8,'max_seconds':2400,
                       'proposal_timeout':120,'evaluation_timeout':900}
     for name,strategy,mixing in [('A','beam',False),('B','adaptive_beam',False),('C','adaptive_beam',True)]:
         config=json.loads(json.dumps(common));config['strategy']=strategy
