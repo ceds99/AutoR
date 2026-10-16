@@ -324,6 +324,8 @@ A/B/C 合成检查使用相同预算上限；脚本指定分数，只验证调�
 
 真实对照使用 `scripts/compare_search.py`：先为选中的任务创建全新的冻结 pilot；提供其公开 instruction 映射 JSON、匹配的镜像回执和经过分析的自然失败 trial 目录。`prepare --help` 列出所需参数，随后按 `baselines <root>`、`search <root>` 分阶段运行。这些调用需要 Harbor 0.24.0、同一 Python 运行环境、专用 Docker VM 和认证；所有输出目录必须位于 VM 允许挂载的路径内。
 
+为对照建立固定位置的 Python 3.12 venv 并安装 `harbor==0.24.0`，保存依赖版本清单。用该 venv 的 Python 执行 prepare、baselines 和 search，并将其 bin 放到 PATH 前端。prepare 会冻结 Python 的绝对路径，因此不要使用可能被清理的临时 `uv run --with` 环境。评测桥会分别检查 Harbor CLI 和 Python 包版本；outer 的 Codex 路径、版本与 inner 的版本分别固定。
+
 每组最多 6 次提案、8 次完整任务集评测、1800 秒累计调用时间，复测与失败计入同一上限；记录实际用量。A 使用 beam；B 使用 adaptive_beam；C 开启 mixing。baseline 不复现失败时，`search` 拒绝启动。若时间预算提前耗尽，报告未完成阶段，不能声称混合或效果已经得到验证。
 
 JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`children_per_parent`、`confirmation_samples`（2–4）和 `mixing`（布尔值）。复测中断后继续用 `autor run`；程序只接纳已落盘的独立结果，不重放不确定调用。`needs_confirmation` 表示预算耗尽前尚未完成确认，不能当作最佳候选。原始样本在 `measurements/`，`evaluation.json` 是派生的逐题平均值。

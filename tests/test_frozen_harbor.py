@@ -38,8 +38,21 @@ class FrozenHarborTests(unittest.TestCase):
 
     def test_started_attempt_blocks_replay(self):
         work=self.root/'work';work.mkdir();(work/'started.json').write_text('{}')
-        with patch.object(bridge,'verify_images'), patch.object(bridge,'run_process',side_effect=AssertionError('must not call')):
+        with patch.object(bridge,'verify_harbor_version'), patch.object(bridge,'verify_images'), patch.object(bridge,'run_process',side_effect=AssertionError('must not call')):
             with self.assertRaises(FileExistsError):bridge.run(self.args)
+
+    def test_cli_and_library_versions_must_both_match(self):
+        for cli,library,code,valid in [
+            ('harbor 0.24.0','0.24.0',0,True),
+            ('harbor 0.25.0','0.24.0',0,False),
+            ('harbor 0.24.0','0.25.0',0,False),
+            ('harbor 0.24.0','0.24.0',1,False),
+        ]:
+            with self.subTest(cli=cli,library=library,code=code):
+                with patch.object(bridge.subprocess,'run',return_value=SimpleNamespace(stdout=cli,returncode=code)), patch('importlib.metadata.version',return_value=library):
+                    if valid:bridge.verify_harbor_version()
+                    else:
+                        with self.assertRaisesRegex(AutorError,'CLI and library'):bridge.verify_harbor_version()
 
     def test_image_tag_drift_blocks_evaluation(self):
         images=self.root/'images.json'

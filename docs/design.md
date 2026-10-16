@@ -1,6 +1,6 @@
 # 当前实现与下一阶段方案
 
-更新：2026-10-16。当前开发版 0.2.0.dev2 已实现有界 beam 与 adaptive_beam；BOS 接入因内网访问暂停，当前优先筛选有可分析失败的任务，再增强搜索。辅助脚本不改变核心版本或冻结实验的源码摘要；v0.1.0 冻结交付保持原样。
+更新：2026-10-16。当前开发版 0.2.0.dev2 已实现有界 beam 与 adaptive_beam；BOS 接入因内网访问暂停，当前优先筛选有可分析失败的任务，随后验证搜索增强的实际效果。v0.1.0 冻结交付保持原样。
 
 ## 目标与职责
 
@@ -46,6 +46,7 @@ flowchart LR
 | [engine.py](../autor/engine.py) | 循环、提案校验、候选状态和晋升 |
 | [permissions.py](../autor/permissions.py) | proposer 命令的工作目录读权限、关闭命令网络及启动前 canary 检查 |
 | [search.py](../autor/search.py) | 三种选父策略、beam 分代筛选与档案重建 |
+| [adaptive.py](../autor/adaptive.py) | adaptive_beam 的互补选择、复测、证据预算与有条件混合 |
 | [adapters.py](../autor/adapters.py) | Codex 提案、demo / command / Harbor 评测协议 |
 | [storage.py](../autor/storage.py) / [config.py](../autor/config.py) | 文件摘要、原子写入、锁、固定契约 |
 | [humaneval.py](../autor/humaneval.py) | 固定任务下载、真实 inner 调用、本地受限 Python 评分和 trial 复用 |

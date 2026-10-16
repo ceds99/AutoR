@@ -3,13 +3,13 @@
   "version": "0.2.0.dev2",
   "status": "implementation-validated-real-comparison-gated",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
-  "support_hash": "2f85c6970a8a549d6e1e8ebe97553488289486021cd7da0a5024b3493cdb8533",
+  "support_hash": "7fe655a1895ca2a2f70feb57f514cda8b2a81c70b6ddfae1a11b469c2c23908f",
   "comparison_runner_sha256": "0995952813782e93855eb64c74fd9236ad39b4153ffc97155265a9f4d2bf2c94",
   "tests": {
-    "passed": 93,
+    "passed": 94,
     "python": "3.12",
     "harbor": "0.24.0",
-    "log_sha256": "570577c4d16d92f82cba2ea88fe6619717156603d5dafa5905ecea574ea15763"
+    "log_sha256": "4dfffdfd28a8c8b15bd33b2e617270bebf4489d0090fa27f3b884bf29b42a220"
   },
   "synthetic_comparison": {
     "synthetic": true,
@@ -470,7 +470,7 @@
   },
   "real_comparison": {
     "started": false,
-    "reason": "No eligible natural failure yet. Hard-task screening in progress; zero from Rosetta/chroot verifier failure excluded.",
+    "reason": "No eligible natural failure yet. Ten hard-task trials passed; Rosetta/chroot verifier failure and an agent-timeout trial excluded. GPT-2 codegolf screening in progress.",
     "holdout_evaluated": false
   },
   "limitations": [

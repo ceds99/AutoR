@@ -28,6 +28,13 @@ def support_hash():
                    for name in ['frozen_harbor_evaluator.py', 'terminal_bench_pilot.py']})
 
 
+def verify_harbor_version():
+    from importlib.metadata import version
+    result=subprocess.run(['harbor','--version'],capture_output=True,text=True,timeout=10)
+    if result.returncode or '0.24.0' not in result.stdout.split() or version('harbor')!='0.24.0':
+        raise AutorError('Frozen evaluator requires Harbor CLI and library 0.24.0')
+
+
 def verify_images(path, expected, tasks):
     if sha(path) != expected:
         raise AutorError('Frozen image receipts changed')
@@ -86,6 +93,7 @@ def run(args):
         raise AutorError('Instruction coverage differs from the frozen task set')
     if not finite_number(args.timeout) or args.timeout <= 30:
         raise AutorError('Need more than 30 seconds including cancellation reserve')
+    verify_harbor_version()
     verify_images(args.images,args.images_sha256,meta['evaluator']['task_names'])
     work.mkdir(parents=True,exist_ok=True)
     with (work/'started.json').open('x') as f:

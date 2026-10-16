@@ -1,0 +1,419 @@
+{
+  "date": "2026-10-16",
+  "status": "screening",
+  "model": "openai/gpt-6-astra",
+  "reasoning_effort": "low",
+  "inner_codex_version": "0.153.4",
+  "harbor_version": "0.24.0",
+  "task_revision": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+  "selection": "Public instruction and task metadata only; no reference solutions or hidden test source. Tasks screened adaptively, so scores are not an unbiased benchmark estimate.",
+  "seed_unchanged": true,
+  "holdout_evaluated": false,
+  "holdout_exclusion": {
+    "commitment": "aef243d350225811b33ba4c4d934e527dfaf861f77b34c7e4f303aa0961ff605",
+    "selected_task_count": 13,
+    "overlap_count": 0,
+    "contents_or_names_emitted": false
+  },
+  "valid_passes": 10,
+  "excluded_trials": 2,
+  "completed_trials": 12,
+  "completed_trial_seconds": 2885.886,
+  "rows": [
+    {
+      "task": "fix-code-vulnerability",
+      "trial": "fix-code-vulnerability__bY8QC3n",
+      "batch": "batch-001",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 300.0,
+      "agent_seconds": 66.189,
+      "trial_seconds": 90.971,
+      "verifier_seconds": 10.351,
+      "task_checksum": "13c4e35adbd7e55707f273aabd8f4108672f0fb790c96af543fbcbdcc977b119",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "b8a14f5aee0fef8ae472cf78ee01f881b775bd6ce923dc07a4ef17cd48444083",
+      "result_sha256": "7a17eeded761435e6f1899a1925fac4b3a89d8d8492511ef20979685543337aa",
+      "agent_log_sha256": "f47e3548e9273d0ac2ed5891a67e979375554cdb5ebe133722c58104bcd88673",
+      "verifier_stdout_sha256": "c701d2b00e41a5a380d0dc8411428d101cc9834eb3726e8f3b0b0ef9c3373701"
+    },
+    {
+      "task": "llm-inference-batching-scheduler",
+      "trial": "llm-inference-batching-scheduler__jN3JoX2",
+      "batch": "batch-001",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 300.0,
+      "agent_seconds": 124.438,
+      "trial_seconds": 171.684,
+      "verifier_seconds": 35.656,
+      "task_checksum": "3a08e63e0643ea5914eedeecb08cb93a1f0a10b9dc7d19d1f570004af84531c8",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "b8a14f5aee0fef8ae472cf78ee01f881b775bd6ce923dc07a4ef17cd48444083",
+      "result_sha256": "f71e9169c982cb852450ed7dcfbfb125a4421e3292438a29a9302e7768ed60b7",
+      "agent_log_sha256": "f2b269d1e0fb7451258845f207e39a8be89302bfc9415ab3c20ac5b639c6c380",
+      "verifier_stdout_sha256": "c5260c04cd2b5bf2ea81b0d1d6dc39943ca23397bf5fc30946b16b8faf382cd7"
+    },
+    {
+      "task": "write-compressor",
+      "trial": "write-compressor__4SPss7n",
+      "batch": "batch-002",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 300.0,
+      "agent_seconds": 84.312,
+      "trial_seconds": 181.468,
+      "verifier_seconds": 82.559,
+      "task_checksum": "1b2f5f4e1df7950c0bfc0f9e1c2cc75072a0d6fe22b74755469d87bfeb3a57c0",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "fb870c173d5772e431637ccac47c9df0f1473e4cf14382b68e8077737821c9c5",
+      "result_sha256": "a49bab212f696bb0db47c415801015edf0361cb0aef7a5b57853bd5fc0ecaed8",
+      "agent_log_sha256": "dce956753a2a29d5a35f2b22e84fa479f72a20e6104078eedac76b4da4a0c5b9",
+      "verifier_stdout_sha256": "59f4a24e57520a3333f1d1f2bb3f85f53e778b31bcc7966eea03253e077667f0"
+    },
+    {
+      "task": "bn-fit-modify",
+      "trial": "bn-fit-modify__Dd6Sb35",
+      "batch": "batch-003",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 300.0,
+      "agent_seconds": 86.758,
+      "trial_seconds": 188.923,
+      "verifier_seconds": 87.214,
+      "task_checksum": "2758dba68c97cbf8fff87af7e955ac424bfe84ff053e20f160f713d3eee2358f",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "c2e312d931cbd07cc973230decbea4cc10a77a7282b31c7235d179d5b342fec4",
+      "result_sha256": "25f6e51b686a3ba704422824a2a67e8137a74d4ed3107efe44f6bf1763405d8f",
+      "agent_log_sha256": "9be48caaf8cf97d06fc6b25cb91a0e714fff7a119291e959bb20a614c40d639f",
+      "verifier_stdout_sha256": "c0011e0531bb8517dd51c3822ab10f273c5d4559b4df150219ee086e399dbd34"
+    },
+    {
+      "task": "sparql-university",
+      "trial": "sparql-university__Fb6qkx9",
+      "batch": "batch-003",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 300.0,
+      "agent_seconds": 150.39,
+      "trial_seconds": 253.929,
+      "verifier_seconds": 91.767,
+      "task_checksum": "5f84ab8191b8b921e3adeae2fa11f7a1f5fc2549627cce7218ae0046f66d450b",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "c2e312d931cbd07cc973230decbea4cc10a77a7282b31c7235d179d5b342fec4",
+      "result_sha256": "e823b19007cdbbe94b2da33b1d2de3dd23d92f8efceb7981173694ead85aced2",
+      "agent_log_sha256": "c88910366e7da6765ff45c9a8236fa9f3ede032acf9d9f3156c81ac87a887926",
+      "verifier_stdout_sha256": "ae85d154e03445f6fd6887443d74da4f0b2b48cd9f9a2250652d031beaadf24e"
+    },
+    {
+      "task": "path-tracing-reverse",
+      "trial": "path-tracing-reverse__dLFgDVG",
+      "batch": "batch-004",
+      "classification": "invalid-verifier-environment",
+      "reported_reward": 0.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 91.915,
+      "trial_seconds": 196.492,
+      "verifier_seconds": 88.687,
+      "task_checksum": "93852df3e66fe6e3b04e1f1039b06b03d5b1a36787e876a094d6c9011653ffae",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "057da233db7f37b03e96318e2397bce7f5c352ecda335f87dd8d5fd1e5389404",
+      "result_sha256": "9063d4010b334bdcd66a02dca579fa05f5acf27890c914919d6d13be67521a88",
+      "agent_log_sha256": "65c08003adf3de8796ab136454d0330ab5741cbd7162e23a984c7b4dd2f4e7cc",
+      "verifier_stdout_sha256": "3a03a9f8e0978a6c591f61830aef940ddec7bf15d7bc6279e967942198a8b9e7"
+    },
+    {
+      "task": "regex-chess",
+      "trial": "regex-chess__DeRNTNg",
+      "batch": "batch-004",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 216.479,
+      "trial_seconds": 335.414,
+      "verifier_seconds": 107.565,
+      "task_checksum": "166af5ebdc4a297de26bf4390f3c9a222238ac47218a665fcb1fb3110a1ac0f1",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "057da233db7f37b03e96318e2397bce7f5c352ecda335f87dd8d5fd1e5389404",
+      "result_sha256": "dd8d5a3eb3b02867d7eabaff9ccf932a87a6088f05c90f4dea8829ca5e97f824",
+      "agent_log_sha256": "11037e802d429ad14543527a9b3a34fe8f14b117362953cca8e812bd25dcef20",
+      "verifier_stdout_sha256": "f73ce9850e3893e233c559ccadd1094c292aedae9bfeb3250c180d36daa596dd"
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "trial": "circuit-fibsqrt__vCQS2Q8",
+      "batch": "batch-005",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 211.39,
+      "trial_seconds": 262.827,
+      "verifier_seconds": 39.874,
+      "task_checksum": "c0e478819545e6c9db2d42b3996441ca0ee55fde09d4cea5b7f9fbdf83bfd337",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "dc7230ed6ae17e923f1c3afba18fbe2f429c6efee39e99e92e5a3d88e38f474b",
+      "result_sha256": "79a16578ab8e5a3e704fccaf97fb7345455a3d0d856831db2bcd6a60bb00b393",
+      "agent_log_sha256": "f546e0b7de0108c33560bef1b6f54aeeccb4b0441b5b1ea0c5810be02eda6c98",
+      "verifier_stdout_sha256": "aa1edf63d79763ecf55eab7fef9fd8b2b0e065b72cc1993f2b137ac4a1284ac6"
+    },
+    {
+      "task": "model-extraction-relu-logits",
+      "trial": "model-extraction-relu-logits__ECLBz5L",
+      "batch": "batch-005",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 108.046,
+      "trial_seconds": 173.416,
+      "verifier_seconds": 50.442,
+      "task_checksum": "d0dd8f420350bee97f2d47a2b0c74996be0146aa7bd6f8a1871d9629200dc359",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "dc7230ed6ae17e923f1c3afba18fbe2f429c6efee39e99e92e5a3d88e38f474b",
+      "result_sha256": "942b973b8616f7883b742083e412b153b6c454d0e958baad2fc9a92d69939fb9",
+      "agent_log_sha256": "6cc39681a0e1b384c1ba9358845b50d8bfdc2f69052118df129817c607449e05",
+      "verifier_stdout_sha256": "2a3eb457d59c5617009020813f318e260e81721fd1aceb77d2eb6f16a844b266"
+    },
+    {
+      "task": "train-fasttext",
+      "trial": "train-fasttext__L23Vusr",
+      "batch": "batch-006",
+      "classification": "exception",
+      "reported_reward": 1.0,
+      "exception_type": "AgentTimeoutError",
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 600.23,
+      "trial_seconds": 709.783,
+      "verifier_seconds": 80.356,
+      "task_checksum": "fe83ab1fc447e909ed3f48d61ff42abfd29b3168c63c3efcdea9c5014c27b2f7",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "3f32a01eb76fec60e9b42f4a6c23e7317e3bb2c94fb552d9a3d600af7c1e279b",
+      "result_sha256": "912a993fb6fabc458ff24c959cc2674d54b0ca68beb3d0a2debfac5f6a53f969",
+      "agent_log_sha256": "ddda82f55707aecbcd203c6b399057e2684b47e52213395ab383c7ac201494bb",
+      "verifier_stdout_sha256": "2f0d3486778b738e5225303aba87b1a32631d90337883149b9b75ac52238ec8a"
+    },
+    {
+      "task": "feal-differential-cryptanalysis",
+      "trial": "feal-differential-cryptanalysis__SmrqVXJ",
+      "batch": "batch-007",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 89.824,
+      "trial_seconds": 166.315,
+      "verifier_seconds": 61.713,
+      "task_checksum": "798945c624cad262a52c46271a557698875990a600a6a5cb35c2dfd9b00bf80d",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "da76936639bfa4baa12511da2dd8a9d71bf0d76dc5811dd8742badede8b24fbd",
+      "result_sha256": "875f3e8017abe2164970181428f55d8e2d5ed03893093c54d07ad3d1c0b1f740",
+      "agent_log_sha256": "087a3322347060265652f0f448940437c5ae9c7c975b3596c8b4ef68609e1753",
+      "verifier_stdout_sha256": "d97246b93eb1ace2b18ae8fb7168b7206b2a021b05cf4f05ab61cd6664b844aa"
+    },
+    {
+      "task": "feal-linear-cryptanalysis",
+      "trial": "feal-linear-cryptanalysis__GU37m8n",
+      "batch": "batch-007",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 600.0,
+      "agent_seconds": 105.894,
+      "trial_seconds": 154.664,
+      "verifier_seconds": 37.313,
+      "task_checksum": "3ee298ac4e31a90a460afa5fc10d34fdca7c1e591ccda5fc2c5faee2963991f2",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "da76936639bfa4baa12511da2dd8a9d71bf0d76dc5811dd8742badede8b24fbd",
+      "result_sha256": "21ddb55e02d86237a071f1481b61e1a374f80e3e8334a61448621271c350d0c3",
+      "agent_log_sha256": "3534add55caee7d7af76ae7242db3553a6bb220bbc11f09b3abab3e4e03f0cf2",
+      "verifier_stdout_sha256": "bcb44cfd6d212b5fa0a65ce70cee6486c17cc598d03e46130749b4f91fa9e3b3"
+    }
+  ],
+  "exclusions": [
+    {
+      "task": "path-tracing-reverse",
+      "classification": "invalid-verifier-environment",
+      "reported_reward": 0,
+      "natural_failure": false,
+      "reason": "Verifier runs original executable inside chroot; Rosetta cannot open /proc/self/exe. Comparison of original and candidate image never completes.",
+      "action": "Exclude from search selection on this ARM+Rosetta runtime; do not modify verifier or reward."
+    },
+    {
+      "task": "train-fasttext",
+      "classification": "agent-timeout-with-passing-artifact",
+      "reported_reward": 1.0,
+      "natural_failure": false,
+      "reason": "Harbor recorded AgentTimeoutError at 600 seconds. Artifact later passed both scoring tests; no completed agent turn in captured log. Not a clean pass or an analyzable scoring failure.",
+      "action": "Exclude from comparison selection; preserve trace and timeout receipt."
+    }
+  ],
+  "images": [
+    {
+      "task": "fix-code-vulnerability",
+      "image": "alexgshaw/fix-code-vulnerability:20251031",
+      "id": "sha256:cac325252991f823713b2d0441502972901dd782bd67f66c03d9b1e410dac5c0",
+      "repo_digests": [
+        "alexgshaw/fix-code-vulnerability@sha256:cac325252991f823713b2d0441502972901dd782bd67f66c03d9b1e410dac5c0"
+      ],
+      "architecture": "amd64",
+      "size": 709331973,
+      "pull_seconds": 40.93371975
+    },
+    {
+      "task": "llm-inference-batching-scheduler",
+      "image": "alexgshaw/llm-inference-batching-scheduler:20251031",
+      "id": "sha256:19e79aa49be4e55dccca1dde966515ebe6852314b6010bcb9230afb48b996774",
+      "repo_digests": [
+        "alexgshaw/llm-inference-batching-scheduler@sha256:19e79aa49be4e55dccca1dde966515ebe6852314b6010bcb9230afb48b996774"
+      ],
+      "architecture": "amd64",
+      "size": 180843479,
+      "pull_seconds": 7.240884125000001
+    },
+    {
+      "task": "write-compressor",
+      "image": "alexgshaw/write-compressor:20251031",
+      "id": "sha256:3618e1f8a997b437c09cd3dbaac736705809c05f6f12f584b65722175970ebe1",
+      "repo_digests": [
+        "alexgshaw/write-compressor@sha256:3618e1f8a997b437c09cd3dbaac736705809c05f6f12f584b65722175970ebe1"
+      ],
+      "architecture": "amd64",
+      "size": 1086772910,
+      "pull_seconds": 43.040017207999995
+    },
+    {
+      "task": "bn-fit-modify",
+      "image": "alexgshaw/bn-fit-modify:20251031",
+      "id": "sha256:5aeb11ca6e802b83816c9a31f055ac9d028309a853509400c2e3139ac2d8380d",
+      "repo_digests": [
+        "alexgshaw/bn-fit-modify@sha256:5aeb11ca6e802b83816c9a31f055ac9d028309a853509400c2e3139ac2d8380d"
+      ],
+      "architecture": "amd64",
+      "size": 957875034,
+      "pull_seconds": 67.662389583
+    },
+    {
+      "task": "sparql-university",
+      "image": "alexgshaw/sparql-university:20251031",
+      "id": "sha256:92fa4304e51167f9fb4466144eba33ef9272a7df0ac1cab9fc3986bccd1ab708",
+      "repo_digests": [
+        "alexgshaw/sparql-university@sha256:92fa4304e51167f9fb4466144eba33ef9272a7df0ac1cab9fc3986bccd1ab708"
+      ],
+      "architecture": "amd64",
+      "size": 117341145,
+      "pull_seconds": 7.318212208000006
+    },
+    {
+      "task": "path-tracing-reverse",
+      "image": "alexgshaw/path-tracing-reverse:20251031",
+      "id": "sha256:7911e42479d8f6d8af1248bc52442a0efbc5a33e3ecf535fdc20d252a2c64142",
+      "repo_digests": [
+        "alexgshaw/path-tracing-reverse@sha256:7911e42479d8f6d8af1248bc52442a0efbc5a33e3ecf535fdc20d252a2c64142"
+      ],
+      "architecture": "amd64",
+      "size": 597750463,
+      "pull_seconds": 26.90981075
+    },
+    {
+      "task": "regex-chess",
+      "image": "alexgshaw/regex-chess:20251031",
+      "id": "sha256:e3b6d61d2d3930fbbdc5f7bf091a7f8b7f6125e1951ef8a7dbe165b1ef62942c",
+      "repo_digests": [
+        "alexgshaw/regex-chess@sha256:e3b6d61d2d3930fbbdc5f7bf091a7f8b7f6125e1951ef8a7dbe165b1ef62942c"
+      ],
+      "architecture": "amd64",
+      "size": 211347312,
+      "pull_seconds": 10.568778042000002
+    },
+    {
+      "task": "model-extraction-relu-logits",
+      "image": "alexgshaw/model-extraction-relu-logits:20251031",
+      "id": "sha256:52fe1f089f38650f0dc22d7531ee6e01ebd526de1b349aaa2ecb331dca9fabce",
+      "repo_digests": [
+        "alexgshaw/model-extraction-relu-logits@sha256:52fe1f089f38650f0dc22d7531ee6e01ebd526de1b349aaa2ecb331dca9fabce"
+      ],
+      "architecture": "amd64",
+      "size": 316871963,
+      "pull_seconds": 28.428349583000003
+    },
+    {
+      "task": "circuit-fibsqrt",
+      "image": "alexgshaw/circuit-fibsqrt:20251031",
+      "id": "sha256:29783439f529eaed2145592f15af7a2281161528860392a382c825489030ae3a",
+      "repo_digests": [
+        "alexgshaw/circuit-fibsqrt@sha256:29783439f529eaed2145592f15af7a2281161528860392a382c825489030ae3a"
+      ],
+      "architecture": "amd64",
+      "size": 566035810,
+      "pull_seconds": 30.725761334
+    },
+    {
+      "task": "train-fasttext",
+      "image": "alexgshaw/train-fasttext:20251031",
+      "id": "sha256:3c77da9617e7fa577de04aef73fb1ac3114be32d7ffef72609c83929d842b157",
+      "repo_digests": [
+        "alexgshaw/train-fasttext@sha256:3c77da9617e7fa577de04aef73fb1ac3114be32d7ffef72609c83929d842b157"
+      ],
+      "architecture": "amd64",
+      "size": 1382211585,
+      "pull_seconds": 73.771185209
+    },
+    {
+      "task": "feal-differential-cryptanalysis",
+      "image": "alexgshaw/feal-differential-cryptanalysis:20251031",
+      "id": "sha256:bea93bafe9eab601ca58729f5735a13f8339f52055322d1cf840e3742b54a287",
+      "repo_digests": [
+        "alexgshaw/feal-differential-cryptanalysis@sha256:bea93bafe9eab601ca58729f5735a13f8339f52055322d1cf840e3742b54a287"
+      ],
+      "architecture": "amd64",
+      "size": 210380073,
+      "pull_seconds": 12.069386792
+    },
+    {
+      "task": "feal-linear-cryptanalysis",
+      "image": "alexgshaw/feal-linear-cryptanalysis:20251031",
+      "id": "sha256:ea78749a8422c6228d26c8753f45906a6a2df089906764b7e3c3e27e8f718ee7",
+      "repo_digests": [
+        "alexgshaw/feal-linear-cryptanalysis@sha256:ea78749a8422c6228d26c8753f45906a6a2df089906764b7e3c3e27e8f718ee7"
+      ],
+      "architecture": "amd64",
+      "size": 574416018,
+      "pull_seconds": 26.115909833000003
+    },
+    {
+      "task": "gpt2-codegolf",
+      "image": "alexgshaw/gpt2-codegolf:20251031",
+      "id": "sha256:537e7bd26b02db5c761230515fa09dc05f89403c6737fbdae4b5793ebc2c7066",
+      "repo_digests": [
+        "alexgshaw/gpt2-codegolf@sha256:537e7bd26b02db5c761230515fa09dc05f89403c6737fbdae4b5793ebc2c7066"
+      ],
+      "architecture": "amd64",
+      "size": 1479851949,
+      "pull_seconds": 90.735474792
+    }
+  ],
+  "runtime": {
+    "digest": "ad896e23f7ef62a94abc8a8b6e1eb022a2a4205de0274a11ba3a03c902495662",
+    "python": "3.12.13",
+    "platform": "macOS ARM host, Linux ARM Docker VM, amd64 task images under Rosetta",
+    "network": "Direct network; stale local proxy removed before model calls. Bounded APT network settings unchanged.",
+    "harbor_environment_freeze_sha256": "c2f39f0c38ab6b513015151366d1b196426feccdbfa561150d0ca43f5dbddaaa"
+  },
+  "limitations": [
+    "Agent and batch caps differ across screening batches; screening scores are not pooled as an A/B/C baseline.",
+    "Reported reward alone does not establish validity; exceptions and incompatible verifier behavior are excluded.",
+    "Actual model charges were not measured. Trial seconds exclude image pulls and environment troubleshooting.",
+    "Two sealed holdout tasks have not been read or evaluated."
+  ],
+  "pending_tasks": [
+    "gpt2-codegolf"
+  ]
+}
