@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "status": "screening",
+  "status": "natural-failure-found-preparing-reproduction",
   "model": "openai/gpt-6-astra",
   "reasoning_effort": "low",
   "inner_codex_version": "0.153.4",
@@ -11,14 +11,14 @@
   "holdout_evaluated": false,
   "holdout_exclusion": {
     "commitment": "aef243d350225811b33ba4c4d934e527dfaf861f77b34c7e4f303aa0961ff605",
-    "selected_task_count": 13,
+    "selected_task_count": 14,
     "overlap_count": 0,
     "contents_or_names_emitted": false
   },
-  "valid_passes": 10,
+  "valid_passes": 11,
   "excluded_trials": 2,
-  "completed_trials": 12,
-  "completed_trial_seconds": 2885.886,
+  "completed_trials": 14,
+  "completed_trial_seconds": 3969.455,
   "rows": [
     {
       "task": "fix-code-vulnerability",
@@ -235,6 +235,42 @@
       "result_sha256": "21ddb55e02d86237a071f1481b61e1a374f80e3e8334a61448621271c350d0c3",
       "agent_log_sha256": "3534add55caee7d7af76ae7242db3553a6bb220bbc11f09b3abab3e4e03f0cf2",
       "verifier_stdout_sha256": "bcb44cfd6d212b5fa0a65ce70cee6486c17cc598d03e46130749b4f91fa9e3b3"
+    },
+    {
+      "task": "gpt2-codegolf",
+      "trial": "gpt2-codegolf__tLqkfzf",
+      "batch": "batch-008",
+      "classification": "passed",
+      "reported_reward": 1.0,
+      "exception_type": null,
+      "agent_cap_seconds": 900.0,
+      "agent_seconds": 218.872,
+      "trial_seconds": 285.087,
+      "verifier_seconds": 51.64,
+      "task_checksum": "c3dfea370953fe9b6cb53d368f1f242af2833cf1af623849bdaee8fe026b1cf1",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "4006a95ab1562fbb1387d602cdbab0f2b5d5a1c91a983dc7f88cd3417b44e19e",
+      "result_sha256": "e74eb4294728061c40b220e0303e6a30943fee05d1fb2aa7c4ee29add9195e15",
+      "agent_log_sha256": "2d81f1d5aae4a9e3febfab51738013664cca0751b676710203591f3265721204",
+      "verifier_stdout_sha256": "c453ee470125b33d31f1d8bea1f666ba4056747dea679363d0e053c4879023fa"
+    },
+    {
+      "task": "torch-pipeline-parallelism",
+      "trial": "torch-pipeline-parallelism__5AqW3TD",
+      "batch": "batch-009",
+      "classification": "natural-failure",
+      "reported_reward": 0.0,
+      "exception_type": null,
+      "agent_cap_seconds": 900.0,
+      "agent_seconds": 84.933,
+      "trial_seconds": 798.482,
+      "verifier_seconds": 698.818,
+      "task_checksum": "3d4bac3d36d63a48403936af61510e24cce92d6650ab4e4b9b21e1192b183646",
+      "seed_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "pilot_sha256": "b235809e9ab61cc256a9c29de14a0f117422d94930de1f997f7b5c28c7dfcea3",
+      "result_sha256": "4c1261b14b81e53ae84916d93ddb179e63fe65bd2bec8cce15c12523593a1618",
+      "agent_log_sha256": "1bb70b8e2ba8da22bd1033087ba20c7548e065deada4dee3f3cde1131a7cab2f",
+      "verifier_stdout_sha256": "ef95e3f5fdc1bd6f60702c412598f16cf408abf51e5c36a94631e0fe07cb6640"
     }
   ],
   "exclusions": [
@@ -398,6 +434,17 @@
       "architecture": "amd64",
       "size": 1479851949,
       "pull_seconds": 90.735474792
+    },
+    {
+      "task": "torch-pipeline-parallelism",
+      "image": "alexgshaw/torch-pipeline-parallelism:20251031",
+      "id": "sha256:3cb7b39d86f1704b20e668851da0b08b34b3270c01d583f136d65190984a8d1b",
+      "repo_digests": [
+        "alexgshaw/torch-pipeline-parallelism@sha256:3cb7b39d86f1704b20e668851da0b08b34b3270c01d583f136d65190984a8d1b"
+      ],
+      "architecture": "amd64",
+      "size": 117318491,
+      "pull_seconds": 7.594430375
     }
   ],
   "runtime": {
@@ -413,7 +460,42 @@
     "Actual model charges were not measured. Trial seconds exclude image pulls and environment troubleshooting.",
     "Two sealed holdout tasks have not been read or evaluated."
   ],
-  "pending_tasks": [
-    "gpt2-codegolf"
-  ]
+  "natural_failures": 1,
+  "pending_tasks": [],
+  "failure_analysis": {
+    "task": "torch-pipeline-parallelism",
+    "reward": 0,
+    "tests_passed": 2,
+    "tests_failed": 2,
+    "agent_completed": true,
+    "failure_type": "Reference backward-activation mismatch at world sizes 1 and 2",
+    "observations": [
+      "Agent reported no Python executable and submitted without numerical runtime testing.",
+      "World size 1: rank 0 lm_head backward, microbatch 0, max diff 0.03571479767560959.",
+      "World size 2: rank 0 model.layers.1 backward, microbatch 0, max diff 0.013752375729382038."
+    ],
+    "hypothesis": "Reusable environment setup and numerical reference checks may help. This is not yet a verified cause or measured improvement.",
+    "gate_receipt": {
+      "task": "torch-pipeline-parallelism",
+      "trial": "torch-pipeline-parallelism__5AqW3TD",
+      "score": 0.0,
+      "task_source": {
+        "git_url": "https://github.com/harbor-framework/terminal-bench-2.git",
+        "git_commit_id": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+        "path": "torch-pipeline-parallelism"
+      },
+      "agent_info": {
+        "name": "codex",
+        "version": "0.153.4",
+        "model_info": {
+          "name": "gpt-6-astra",
+          "provider": "openai"
+        }
+      },
+      "task_checksum": "3d4bac3d36d63a48403936af61510e24cce92d6650ab4e4b9b21e1192b183646",
+      "result_sha256": "4c1261b14b81e53ae84916d93ddb179e63fe65bd2bec8cce15c12523593a1618",
+      "agent_log_sha256": "1bb70b8e2ba8da22bd1033087ba20c7548e065deada4dee3f3cde1131a7cab2f",
+      "verifier_stdout_sha256": "ef95e3f5fdc1bd6f60702c412598f16cf408abf51e5c36a94631e0fe07cb6640"
+    }
+  }
 }

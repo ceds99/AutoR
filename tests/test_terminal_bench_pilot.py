@@ -11,6 +11,31 @@ from autor.storage import AutorError, read_json, write_json
 
 
 class TerminalBenchPilotTests(unittest.TestCase):
+    def test_dependency_cache_is_frozen_and_privately_copied(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            node = base / "node"; node.mkdir(); (node / "node").write_text("fixture")
+            cache = base / "cache"; cache.mkdir(); (cache / "wheel.txt").write_text("clean")
+            root = base / "pilot"
+            pilot.prepare(root, "fixture", "0.153.4", "a" * 64, node_runtime=node, dependency_cache=cache)
+            staged = root / "runtime/uv-cache"
+            mount = next(m for m in read_json(root / "search-job.json")["environment"]["mounts"]
+                         if m["target"] == "/opt/autor-uv-cache")
+            self.assertEqual(mount["target"], "/opt/autor-uv-cache")
+            self.assertTrue(mount["read_only"])
+            profile = (root / "runtime/node-profile.sh").read_text()
+            for index in (1, 2):
+                private = base / ("container-" + str(index))
+                local_profile = base / ("profile-" + str(index))
+                local_profile.write_text(profile.replace("/opt/autor-uv-cache", str(staged)).replace("/tmp/autor-uv-cache", str(private)))
+                subprocess.run(["bash", "-c", 'test "$(cat "$UV_CACHE_DIR/wheel.txt")" = clean && printf changed > "$UV_CACHE_DIR/wheel.txt"'],
+                               env={**os.environ, "BASH_ENV": str(local_profile)}, check=True)
+            self.assertEqual((staged / "wheel.txt").read_text(), "clean")
+            pilot.load(root)
+            (staged / "wheel.txt").write_text("drift")
+            with self.assertRaisesRegex(AutorError, "runtime override changed"):
+                pilot.load(root)
+
     def test_network_proxy_is_container_only_and_preserves_local_endpoints(self):
         with tempfile.TemporaryDirectory() as temp:
             source = Path(temp) / "runtime"
@@ -61,10 +86,26 @@ class TerminalBenchPilotTests(unittest.TestCase):
     def test_invalid_search_selection_or_budget_rejected(self):
         cases = [{"task_names": x} for x in ([], ["x", "x"], ["../x"], ["fix-*"], ["x"] * 7)]
         cases += [{"agent_timeout": 0}, {"max_seconds": float("inf")}, {"agent_timeout": True}]
+        cases += [{"task_revision": "main"}, {"task_prefix": "../tasks/"},
+                  {"task_git_url": "https://user:secret@example.org/tasks.git"},
+                  {"dataset_version": "latest"}]
         with tempfile.TemporaryDirectory() as temp:
             for index, kwargs in enumerate(cases):
                 with self.subTest(kwargs=kwargs), self.assertRaises(AutorError):
                     pilot.prepare(Path(temp) / str(index), "fixture", "0.153.4", "a" * 64, **kwargs)
+
+    def test_other_dataset_revision_and_prefix_are_frozen(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "pilot"
+            meta = pilot.prepare(root, "fixture", "0.153.4", "a" * 64,
+                task_names=["example"], task_git_url="https://example.org/tasks.git",
+                task_revision="b" * 40, task_prefix="tasks/", dataset_version="4.0.0", task_name_prefix="terminal-bench/")
+            job = read_json(root / "search-job.json")
+            self.assertEqual(job["tasks"], [{"path": "tasks/example", "git_url": "https://example.org/tasks.git",
+                "git_commit_id": "b" * 40, "source": "terminal-bench-4.0.0-pilot"}])
+            self.assertEqual(meta["evaluator"]["dataset_version"], "4.0.0")
+            self.assertEqual(meta["evaluator"]["task_names"], ["terminal-bench/example"])
+            self.assertEqual(pilot.load(root)["task_revision"], "b" * 40)
 
     def test_prepare_is_search_only_and_pinned(self):
         with tempfile.TemporaryDirectory() as temp:

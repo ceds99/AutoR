@@ -48,6 +48,8 @@ def prepare(args):
     if gate['task'] not in tasks:raise AutorError('Failure task must be in the fixed comparison set')
     if (gate.get('task_source') or {}).get('git_commit_id')!=meta['task_revision']:
         raise AutorError('Failure source revision differs from the comparison')
+    if meta.get('task_git_url') and (gate.get('task_source') or {}).get('git_url')!=meta['task_git_url']:
+        raise AutorError('Failure source repository differs from the comparison')
     info=gate.get('agent_info') or {}
     if info.get('version')!=meta['evaluator']['agent_version'] or (info.get('model_info') or {}).get('name')!=meta['evaluator']['model'].split('/')[-1]:
         raise AutorError('Failure model/CLI differs from the comparison')

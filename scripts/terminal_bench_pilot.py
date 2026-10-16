@@ -51,7 +51,10 @@ def runtime_digest(root):
 
 
 def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_runtime=None,
-            task_names=None, agent_timeout=180, max_seconds=1200, apt_proxy=None, network_proxy=None):
+            task_names=None, agent_timeout=180, max_seconds=1200, apt_proxy=None, network_proxy=None,
+            task_git_url="https://github.com/harbor-framework/terminal-bench-2.git",
+            task_revision=REVISION, task_prefix="", dataset_version="2.0", task_name_prefix="",
+            dependency_cache=None):
     root = Path(root).resolve()
     if root.exists():
         raise AutorError("Choose a new pilot directory")
@@ -65,10 +68,22 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
         raise AutorError("Choose 1–6 unique exact search task names")
     if any(not finite_number(v) or v <= 0 for v in (agent_timeout, max_seconds)):
         raise AutorError("Agent and pilot time budgets must be positive finite seconds")
+    source = urlsplit(task_git_url)
+    if (source.scheme != "https" or not source.hostname or source.username or source.password
+            or source.query or source.fragment or not source.path.endswith(".git")):
+        raise AutorError("Task source must be a credential-free HTTPS Git repository")
+    if not re.fullmatch(r"[a-f0-9]{40}", task_revision):
+        raise AutorError("Task revision must be an exact 40-character Git commit")
+    if any(not re.fullmatch(r"(?:[A-Za-z0-9_-]+/)*", value) for value in (task_prefix, task_name_prefix)):
+        raise AutorError("Task prefixes must contain only relative names ending in /")
+    if not re.fullmatch(r"\d+\.\d+(?:\.\d+)?", dataset_version):
+        raise AutorError("Dataset version must be explicit and numeric")
     if apt_proxy is not None and not bounded_apt:
         raise AutorError("APT proxy requires --bounded-apt")
     if network_proxy is not None and node_runtime is None:
         raise AutorError("Network proxy requires --node-runtime for the container-only profile")
+    if dependency_cache is not None and node_runtime is None:
+        raise AutorError("Dependency cache requires --node-runtime for the container-only profile")
     for proxy in (apt_proxy, network_proxy):
         if proxy is None:
             continue
@@ -81,13 +96,14 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
     harness.mkdir(parents=True)
     (harness / "prompt.md").write_text(SEED_PROMPT, encoding="utf-8")
     settings = {"kind": "harbor", "model": model, "agent_version": version,
-                "dataset": "terminal-bench", "dataset_version": "2.0", "task_names": tasks,
+                "dataset": "terminal-bench", "dataset_version": dataset_version,
+                "task_names": [task_name_prefix + name for name in tasks],
                 "attempts": 1, "metric": "reward", "agent_timeout": agent_timeout}
     job = adapters.harbor_config(settings, harness, root)
     # Pin explicit task commits instead of resolving a mutable remote registry at run time.
     job["datasets"] = []
-    job["tasks"] = [{"path": name, "git_url": "https://github.com/harbor-framework/terminal-bench-2.git",
-                     "git_commit_id": REVISION, "source": "terminal-bench-2.0-pilot"} for name in tasks]
+    job["tasks"] = [{"path": task_prefix + name, "git_url": task_git_url,
+                     "git_commit_id": task_revision, "source": "terminal-bench-" + dataset_version + "-pilot"} for name in tasks]
     job["agents"][0]["kwargs"]["reasoning_effort"] = "low"
     overrides = {}
     if bounded_apt:
@@ -122,13 +138,32 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
             for name in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
                 profile += 'export ' + name + '=' + shlex.quote(network_proxy) + '\n'
             profile += 'export NO_PROXY=localhost,127.0.0.1,::1\nexport no_proxy="$NO_PROXY"\n'
+        if dependency_cache:
+            cache_source = Path(dependency_cache).resolve()
+            cache_hash = runtime_digest(cache_source)
+            cache_destination = root / "runtime/uv-cache"
+            shutil.copytree(cache_source, cache_destination, symlinks=True)
+            if runtime_digest(cache_destination) != cache_hash:
+                raise AutorError("Dependency cache changed while staging")
+            overrides["runtime/uv-cache"] = cache_hash
+            job["environment"]["mounts"].append({"type": "bind", "source": str(cache_destination),
+                "target": "/opt/autor-uv-cache", "read_only": True})
+            # Each container gets a private writable copy. Candidate/test writes never
+            # return to the shared immutable cache or a later task/candidate.
+            profile += ('export UV_CACHE_DIR=/tmp/autor-uv-cache\n'
+                        'if [ ! -f "$UV_CACHE_DIR/.autor-ready" ]; then\n'
+                        '  mkdir -p "$UV_CACHE_DIR" && cp -a /opt/autor-uv-cache/. "$UV_CACHE_DIR"/ || exit 1\n'
+                        '  touch "$UV_CACHE_DIR/.autor-ready" || exit 1\n'
+                        'fi\n')
         profile_path.write_text(profile, encoding="utf-8")
         overrides["runtime/node-profile.sh"] = hashlib.sha256(profile_path.read_bytes()).hexdigest()
         job["environment"]["mounts"].append({"type": "bind", "source": str(profile_path),
             "target": "/etc/profile.d/autor-node.sh", "read_only": True})
     write_json(root / "search-job.json", job)
     metadata = {"schema_version": 1, "mode": "baseline-only", "evaluator": settings,
-                "task_revision": REVISION, "holdout_count": 2, "holdout_commitment": holdout_commitment,
+                "task_revision": task_revision, "task_git_url": task_git_url, "task_prefix": task_prefix,
+                "task_name_prefix": task_name_prefix,
+                "holdout_count": 2, "holdout_commitment": holdout_commitment,
                 "job_hash": digest(job), "prompt_sha256": hashlib.sha256((harness / "prompt.md").read_bytes()).hexdigest(),
                 "max_seconds": max_seconds, "runtime_overrides": overrides, "limitations": "Short-budget pilot, not an official leaderboard score. No holdout data is loaded and no proposer is called."}
     write_json(root / "pilot.json", metadata)
@@ -146,7 +181,7 @@ def load(root):
     if hashlib.sha256((root / "harness/prompt.md").read_bytes()).hexdigest() != metadata["prompt_sha256"]:
         raise AutorError("Baseline prompt changed")
     for name, expected in metadata.get("runtime_overrides", {}).items():
-        if name == "runtime/node":
+        if name in ("runtime/node", "runtime/uv-cache"):
             actual = runtime_digest(root / name)
         elif name in ("runtime/apt-network.conf", "runtime/node-profile.sh"):
             actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
@@ -218,12 +253,18 @@ def main():
     init.add_argument("--inner-version", required=True)
     init.add_argument("--holdout-commitment", required=True)
     init.add_argument("--node-runtime", type=Path, help="Stage a trusted extracted Linux Node distribution as a hashed read-only runtime mount")
+    init.add_argument("--dependency-cache", type=Path, help="Stage an audited third-party uv wheel cache; cloned privately inside each container")
     init.add_argument("--bounded-apt", action="store_true", help="Freeze an APT 15-second connection timeout with no retries; recorded runtime deviation")
     init.add_argument("--apt-proxy", help="Optional credential-free proxy origin reachable from the container; requires --bounded-apt and is frozen in the runtime receipt")
     init.add_argument("--network-proxy", help="Optional credential-free HTTP(S) proxy for container commands only; requires --node-runtime; loopback traffic bypasses it")
     init.add_argument("--task", action="append", help="Exact search task name; repeat for 1–6 tasks. Defaults to the original four-task pilot.")
     init.add_argument("--agent-timeout", type=float, default=180)
     init.add_argument("--max-seconds", type=float, default=1200)
+    init.add_argument("--task-git-url", default="https://github.com/harbor-framework/terminal-bench-2.git")
+    init.add_argument("--task-revision", default=REVISION, help="Exact Git commit; never a moving branch or tag")
+    init.add_argument("--task-prefix", default="", help="Relative task directory prefix, e.g. tasks/")
+    init.add_argument("--task-name-prefix", default="", help="Canonical task-name prefix from task.toml, e.g. terminal-bench/")
+    init.add_argument("--dataset-version", default="2.0")
     for command in ("check", "run"):
         sub.add_parser(command).add_argument("root", type=Path)
     args = parser.parse_args()
@@ -231,7 +272,8 @@ def main():
         if args.command == "prepare":
             result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment,
                              args.bounded_apt, args.node_runtime, args.task, args.agent_timeout, args.max_seconds,
-                             args.apt_proxy, args.network_proxy)
+                             args.apt_proxy, args.network_proxy, args.task_git_url, args.task_revision,
+                             args.task_prefix, args.dataset_version, args.task_name_prefix, args.dependency_cache)
         elif args.command == "check":
             result = preflight(args.root)
             write_json(args.root / "preflight.json", result)

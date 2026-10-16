@@ -1,15 +1,15 @@
 {
   "date": "2026-10-16",
   "version": "0.2.0.dev2",
-  "status": "implementation-validated-real-comparison-gated",
+  "status": "natural-failure-found-reproduction-pending",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
-  "support_hash": "7fe655a1895ca2a2f70feb57f514cda8b2a81c70b6ddfae1a11b469c2c23908f",
-  "comparison_runner_sha256": "0995952813782e93855eb64c74fd9236ad39b4153ffc97155265a9f4d2bf2c94",
+  "support_hash": "8f579691172a653eb1f1498654001893bbe50fdef200728e9082737c4c018dcd",
+  "comparison_runner_sha256": "a29aa9bb74973be7deaebef3117db2e4a8e4e90bb6666311c3e19ba80ea26e54",
   "tests": {
-    "passed": 94,
+    "passed": 96,
     "python": "3.12",
     "harbor": "0.24.0",
-    "log_sha256": "4dfffdfd28a8c8b15bd33b2e617270bebf4489d0090fa27f3b884bf29b42a220"
+    "log_sha256": "3152816ba4a0e69a0268c390918b21cc47118446a1e80d96af7e7f4550290e32"
   },
   "synthetic_comparison": {
     "synthetic": true,
@@ -470,8 +470,14 @@
   },
   "real_comparison": {
     "started": false,
-    "reason": "No eligible natural failure yet. Ten hard-task trials passed; Rosetta/chroot verifier failure and an agent-timeout trial excluded. GPT-2 codegolf screening in progress.",
-    "holdout_evaluated": false
+    "reason": "A completed torch-pipeline-parallelism seed trial scored 0 with two concrete backward-activation assertion failures. Fresh A/B/C baselines have not run yet; they must reproduce the failure.",
+    "holdout_evaluated": false,
+    "phase": "preparing-common-dependency-cache",
+    "selected_tasks": [
+      "torch-pipeline-parallelism",
+      "fix-git"
+    ],
+    "screening_evidence": "hard-task-selection.json"
   },
   "limitations": [
     "Synthetic scores are assigned fixtures, not measured harness improvement.",

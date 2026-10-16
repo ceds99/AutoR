@@ -331,3 +331,9 @@ A/B/C 合成检查使用相同预算上限；脚本指定分数，只验证调�
 JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`children_per_parent`、`confirmation_samples`（2–4）和 `mixing`（布尔值）。复测中断后继续用 `autor run`；程序只接纳已落盘的独立结果，不重放不确定调用。`needs_confirmation` 表示预算耗尽前尚未完成确认，不能当作最佳候选。原始样本在 `measurements/`，`evaluation.json` 是派生的逐题平均值。
 
 本地 Harbor wrapper 使用命令评测器的 `{timeout}` 占位符接收实际剩余时间，保留 30 秒取消空间。强制终止或主机崩溃后仍须核对 Docker 残留；取消本地进程并不保证容器已经停止。重启前不要改变冻结源码、运行时或配置；有修复时新建实验，保留旧账本。该本地 wrapper 的外部 runtime、镜像和指令文件目前不随通用导出包迁移。
+
+评分依赖下载过慢时，pilot 支持 `--dependency-cache /path/to/audited-uv-cache`（同时指定 `--node-runtime`）。仅允许使用审计过的公开第三方 wheel 缓存；当前准备流程保留 `archive-v0`、`wheels-v5`、`simple-v18`，核对 wheel RECORD，剔除任务、测试、环境实例和凭证。缓存摘要进入 pilot 契约，宿主挂载只读；每个容器启动时复制到自己的 `/tmp/autor-uv-cache`。后续任务和候选不会继承前一容器的写入。启用缓存属于运行环境变更，须新建实验并重新测量全部 baseline。
+
+依赖预热可用 `nop` agent，不调用模型；其分数不得作为 baseline 或自然失败证据。若需在完成后提取缓存，Docker 环境要显式设置 `environment.kwargs.keep_containers: true`。Harbor 0.24.0 的 `environment.delete: false` 仍会移除容器，只保留部分其他资源，不能用来保留容器缓存。提取审计后只清理本次预热的容器。
+
+任务来源可通过 `--task-git-url`、`--task-revision`、`--task-prefix`、`--task-name-prefix`、`--dataset-version` 固定。revision 必须是完整 commit；目录前缀与 task.toml 中的任务名空间分别记录。当前真实筛选仍来自固定的 Terminal-Bench 2.0 commit。已查看 [Terminal-Bench 4.0 官方更新](https://www.tbench.ai/news/terminal-bench-4-0)及部分公开任务元数据，但尚未完成本机运行验证，也未把新版成绩混入当前对照。
