@@ -1,0 +1,594 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-16",
+  "mode": "baseline-task-screening",
+  "status": "screening-complete-selection-gate-not-met",
+  "task_source": {
+    "url": "https://github.com/harbor-framework/terminal-bench-2",
+    "commit": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c"
+  },
+  "predeclared_selection_plan_sha256": "774ed2bcfa7a65bcd646204d22a6efb30422112c2345d0868be0220a880398cf",
+  "primary_tasks": [
+    "db-wal-recovery",
+    "regex-log",
+    "multi-source-data-merger",
+    "git-multibranch"
+  ],
+  "reserve_tasks": [
+    "sqlite-db-truncate",
+    "custom-memory-heap-crash"
+  ],
+  "reserve_condition": "Only if the first batch has no valid below-perfect task result; at most two more tasks, same model/prompt/agent timeout.",
+  "criteria": [
+    "Complete valid measurement; infrastructure errors are not task failures.",
+    "At least one natural below-perfect result with actionable execution feedback.",
+    "Prefer different failure mechanisms and keep passing tasks as regression controls.",
+    "Freeze the selected search set and runtime before any A/B/C comparison."
+  ],
+  "model": "openai/gpt-6-astra",
+  "codex_version": "0.153.4",
+  "reasoning_effort": "low",
+  "harbor_version": "0.24.0",
+  "proposer_calls": 0,
+  "holdout_evaluated": false,
+  "holdout_commitment": "aef243d350225811b33ba4c4d934e527dfaf861f77b34c7e4f303aa0961ff605",
+  "runtime_receipt": {
+    "source": "Official @openai/codex npm platform package",
+    "codex_version": "0.153.4",
+    "platform": "linux-x64",
+    "archive_sha256": "54818cb9fce3360cc6e44cfc5a96952cd5c1243efb43cbe488e11dda84663e08",
+    "npm_sha512_integrity_verified": true,
+    "runtime_digest": "ad896e23f7ef62a94abc8a8b6e1eb022a2a4205de0274a11ba3a03c902495662",
+    "node_version": "22.23.3",
+    "ca_bundle_source": "Host public OS CA trust bundle; copied, not credential material",
+    "ca_bundle_sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994",
+    "scope": "Preinstalled same-version Codex and rg, read-only runtime; avoid online setup, no model/prompt/benchmark changes.",
+    "curl_source_image": {
+      "task": "git-multibranch",
+      "image": "alexgshaw/git-multibranch:20251031",
+      "id": "sha256:5bc449921c138295f6ddd8dca2977319fee2ce523811dbe56cec4ca663385fb5",
+      "repo_digests": [
+        "alexgshaw/git-multibranch@sha256:5bc449921c138295f6ddd8dca2977319fee2ce523811dbe56cec4ca663385fb5"
+      ],
+      "architecture": "amd64",
+      "size": 892182710,
+      "pull_seconds": 60.675593582999994
+    },
+    "curl_system_files": [
+      "/lib/x86_64-linux-gnu/libbrotlicommon.so.1",
+      "/lib/x86_64-linux-gnu/libbrotlidec.so.1",
+      "/lib/x86_64-linux-gnu/libc.so.6",
+      "/lib/x86_64-linux-gnu/libcom_err.so.2",
+      "/lib/x86_64-linux-gnu/libcrypto.so.3",
+      "/lib/x86_64-linux-gnu/libcurl.so.4",
+      "/lib/x86_64-linux-gnu/libffi.so.8",
+      "/lib/x86_64-linux-gnu/libgmp.so.10",
+      "/lib/x86_64-linux-gnu/libgnutls.so.30",
+      "/lib/x86_64-linux-gnu/libgssapi_krb5.so.2",
+      "/lib/x86_64-linux-gnu/libhogweed.so.6",
+      "/lib/x86_64-linux-gnu/libidn2.so.0",
+      "/lib/x86_64-linux-gnu/libk5crypto.so.3",
+      "/lib/x86_64-linux-gnu/libkeyutils.so.1",
+      "/lib/x86_64-linux-gnu/libkrb5.so.3",
+      "/lib/x86_64-linux-gnu/libkrb5support.so.0",
+      "/lib/x86_64-linux-gnu/liblber.so.2",
+      "/lib/x86_64-linux-gnu/libldap.so.2",
+      "/lib/x86_64-linux-gnu/libnettle.so.8",
+      "/lib/x86_64-linux-gnu/libnghttp2.so.14",
+      "/lib/x86_64-linux-gnu/libp11-kit.so.0",
+      "/lib/x86_64-linux-gnu/libpsl.so.5",
+      "/lib/x86_64-linux-gnu/libresolv.so.2",
+      "/lib/x86_64-linux-gnu/librtmp.so.1",
+      "/lib/x86_64-linux-gnu/libsasl2.so.2",
+      "/lib/x86_64-linux-gnu/libssh.so.4",
+      "/lib/x86_64-linux-gnu/libssl.so.3",
+      "/lib/x86_64-linux-gnu/libtasn1.so.6",
+      "/lib/x86_64-linux-gnu/libunistring.so.5",
+      "/lib/x86_64-linux-gnu/libz.so.1",
+      "/lib/x86_64-linux-gnu/libzstd.so.1",
+      "/lib64/ld-linux-x86-64.so.2",
+      "/usr/bin/curl"
+    ],
+    "curl_note": "System binary and shared libraries only; no task assets or solutions copied. Loader isolated to bundled curl; TLS verification enabled."
+  },
+  "images": [
+    {
+      "task": "db-wal-recovery",
+      "image": "alexgshaw/db-wal-recovery:20251031",
+      "id": "sha256:0e33ea5ec823975d1bd6c3778395c9f94251dd88f571146057bff6adb7e4594e",
+      "repo_digests": [
+        "alexgshaw/db-wal-recovery@sha256:0e33ea5ec823975d1bd6c3778395c9f94251dd88f571146057bff6adb7e4594e"
+      ],
+      "architecture": "amd64",
+      "size": 710832241,
+      "pull_seconds": 38.884383125
+    },
+    {
+      "task": "regex-log",
+      "image": "alexgshaw/regex-log:20251031",
+      "id": "sha256:90101b2e815323a8da20528a1439bebc407eb9761c9c68a3d557730856c878e9",
+      "repo_digests": [
+        "alexgshaw/regex-log@sha256:90101b2e815323a8da20528a1439bebc407eb9761c9c68a3d557730856c878e9"
+      ],
+      "architecture": "amd64",
+      "size": 117318474,
+      "pull_seconds": 8.058883250000001
+    },
+    {
+      "task": "multi-source-data-merger",
+      "image": "alexgshaw/multi-source-data-merger:20251031",
+      "id": "sha256:8b32782078ff7383a1b4e5d3cecca8ce287e30f50bb4c0e5db009a18064e666e",
+      "repo_digests": [
+        "alexgshaw/multi-source-data-merger@sha256:8b32782078ff7383a1b4e5d3cecca8ce287e30f50bb4c0e5db009a18064e666e"
+      ],
+      "architecture": "amd64",
+      "size": 793971968,
+      "pull_seconds": 43.55517808399999
+    },
+    {
+      "task": "git-multibranch",
+      "image": "alexgshaw/git-multibranch:20251031",
+      "id": "sha256:5bc449921c138295f6ddd8dca2977319fee2ce523811dbe56cec4ca663385fb5",
+      "repo_digests": [
+        "alexgshaw/git-multibranch@sha256:5bc449921c138295f6ddd8dca2977319fee2ce523811dbe56cec4ca663385fb5"
+      ],
+      "architecture": "amd64",
+      "size": 892182710,
+      "pull_seconds": 60.675593582999994
+    },
+    {
+      "task": "sqlite-db-truncate",
+      "image": "alexgshaw/sqlite-db-truncate:20251031",
+      "id": "sha256:aabac93c93bd1f310e6a6fb893911d7735026ed18491c72133c9196a09092ca4",
+      "repo_digests": [
+        "alexgshaw/sqlite-db-truncate@sha256:aabac93c93bd1f310e6a6fb893911d7735026ed18491c72133c9196a09092ca4"
+      ],
+      "architecture": "amd64",
+      "size": 180700235,
+      "pull_seconds": 5.275865708
+    },
+    {
+      "task": "custom-memory-heap-crash",
+      "image": "alexgshaw/custom-memory-heap-crash:20251031",
+      "id": "sha256:1895d7d6240d5fb2ec774d6bfdd1057d170f8d199c15c582e4585d3c63802557",
+      "repo_digests": [
+        "alexgshaw/custom-memory-heap-crash@sha256:1895d7d6240d5fb2ec774d6bfdd1057d170f8d199c15c582e4585d3c63802557"
+      ],
+      "architecture": "amd64",
+      "size": 5985128996,
+      "pull_seconds": 221.90081425
+    }
+  ],
+  "batches": [
+    {
+      "incomplete_trials": [],
+      "id": "batch-001",
+      "started": true,
+      "complete_valid_aggregate": false,
+      "failed_or_interrupted": true,
+      "pilot_contract_sha256": "5945e7e1fd8eed48e42180a7b2747db32984d9e60b9d882744d11a6bc951d0b6",
+      "job_sha256": "6936c5f64266fdc6441fc8e285c09ab15a230aa46ce0aa1907366e5ffefb30cf",
+      "runtime_digest": "e2fa079dfc3282755ca6d385bdbdc9f0a1784efd294a5475bc7d95f51c5959a9",
+      "prompt_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "agent_cap_seconds": 300,
+      "batch_cap_seconds": 1800,
+      "trials": [
+        {
+          "task": "db-wal-recovery",
+          "trial": "db-wal-recovery__483S3tM",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "01f470c86f3a1f7ce4d91bdf0aaaa89fa96a4124ac48617990e2735b5291913a",
+          "started_at": "2026-10-16T02:43:10.376187Z",
+          "finished_at": "2026-10-16T02:47:40.718982Z",
+          "seconds": 270.343,
+          "agent_seconds": 70.504,
+          "verifier_seconds": 71.287,
+          "usage_reported": {
+            "n_input_tokens": 91861,
+            "n_cache_tokens": 86144,
+            "n_output_tokens": 1111,
+            "cost_usd": 0.19886399999999999,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 91861,
+                "n_cache_tokens": 86144,
+                "n_output_tokens": 1111,
+                "cost_usd": 0.19886399999999999
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "59c504b95c831315a7616178980f7cdbf7a4d84840a4f6e52ddd848cd1b6a9cd",
+          "verifier_stdout_sha256": "db0011c4635c31fecaac905c87e5b0d3f2be69dcec09b8daec9a74733b41ca1d",
+          "trajectory_sha256": "7ea0694b8067db8e0682b401267f39a6f99d6409bfeb3c656e6677306565b952"
+        },
+        {
+          "task": "git-multibranch",
+          "trial": "git-multibranch__SfwQktZ",
+          "score": null,
+          "exception_type": "NonZeroAgentExitCodeError",
+          "task_checksum": "b569c7f37491065e1c14c8074024ffa47cad6f9c4e797213af81ef8617bccb9c",
+          "started_at": "2026-10-16T02:50:27.396464Z",
+          "finished_at": "2026-10-16T02:52:21.129308Z",
+          "seconds": 113.733,
+          "agent_seconds": null,
+          "verifier_seconds": null,
+          "usage_reported": null,
+          "result_sha256": "465af709e574723ab37595e0af3fee2aee8156639fa4e363a8977f15b3a8b239",
+          "verifier_stdout_sha256": null,
+          "trajectory_sha256": null
+        },
+        {
+          "task": "multi-source-data-merger",
+          "trial": "multi-source-data-merger__ix4TUc5",
+          "score": null,
+          "exception_type": "NonZeroAgentExitCodeError",
+          "task_checksum": "0f86ced6d81948760d828ee03060c28c44eb7244e7ef72442c18dc1c71115280",
+          "started_at": "2026-10-16T02:48:49.318936Z",
+          "finished_at": "2026-10-16T02:50:27.390761Z",
+          "seconds": 98.072,
+          "agent_seconds": null,
+          "verifier_seconds": null,
+          "usage_reported": null,
+          "result_sha256": "e29d4c82bfc7f33ba92f52c0b5a7af9c75e577c36cc45431a11fac99a1fac450",
+          "verifier_stdout_sha256": null,
+          "trajectory_sha256": null
+        },
+        {
+          "task": "regex-log",
+          "trial": "regex-log__s62aj9H",
+          "score": null,
+          "exception_type": "NetworkConnectionError",
+          "task_checksum": "21c195b5984842dcef348132035504459514fc9ba31d1d813a82e59aa784dcc9",
+          "started_at": "2026-10-16T02:47:40.727039Z",
+          "finished_at": "2026-10-16T02:48:49.311463Z",
+          "seconds": 68.584,
+          "agent_seconds": null,
+          "verifier_seconds": null,
+          "usage_reported": null,
+          "result_sha256": "1c094f9f418f0b1a1a559dcc05d2bba3e51c8af4b16ad754d5c09d0f5b1eff8d",
+          "verifier_stdout_sha256": null,
+          "trajectory_sha256": null
+        }
+      ]
+    },
+    {
+      "incomplete_trials": [],
+      "id": "batch-002",
+      "started": false,
+      "complete_valid_aggregate": false,
+      "failed_or_interrupted": false,
+      "pilot_contract_sha256": "2f8a20b3242700c68a32266902455026da17f881747d5a7051817cb57d33312c",
+      "job_sha256": "761f56c54ba3176f1a44307c398fd20f0eda6f7833bbdef121f2ed1d565bb665",
+      "runtime_digest": "6ae0f9f50c7115ea82f8caff83f0959a6d88259e5fcede3058b577df9544e9d2",
+      "prompt_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "agent_cap_seconds": 300,
+      "batch_cap_seconds": 1500,
+      "trials": []
+    },
+    {
+      "incomplete_trials": [
+        {
+          "trial": "regex-log__ivgBTf2",
+          "agent_log_sha256": "d44fd11951bccb85ee6c10b8bdcadc40da3a6af0a84235084153f418355abfea",
+          "billing": "unknown if a model request was dispatched; no complete measurement accepted"
+        }
+      ],
+      "id": "batch-003",
+      "started": true,
+      "complete_valid_aggregate": false,
+      "failed_or_interrupted": true,
+      "pilot_contract_sha256": "8b88de261cd68f7c733c2251b80f9bdc61d62ec833ca1305d75cdeb61b8861e3",
+      "job_sha256": "33f45b957778d4c2b1cfd75c76d2fedaa2e4f9636b417b2ee5aaf7963ed99ab1",
+      "runtime_digest": "ad896e23f7ef62a94abc8a8b6e1eb022a2a4205de0274a11ba3a03c902495662",
+      "prompt_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "agent_cap_seconds": 300,
+      "batch_cap_seconds": 1500,
+      "trials": []
+    },
+    {
+      "incomplete_trials": [],
+      "id": "batch-004",
+      "started": true,
+      "complete_valid_aggregate": true,
+      "failed_or_interrupted": false,
+      "pilot_contract_sha256": "b02fe480dac6c9930449c1c1b3eb654a57b69d6f5e6120d754df26de5afd341d",
+      "job_sha256": "5fa93ec26596aec7296f894708f28e7bc089f6378e5bed4d720d545095b5dfaa",
+      "runtime_digest": "ad896e23f7ef62a94abc8a8b6e1eb022a2a4205de0274a11ba3a03c902495662",
+      "prompt_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "agent_cap_seconds": 300,
+      "batch_cap_seconds": 1500,
+      "trials": [
+        {
+          "task": "git-multibranch",
+          "trial": "git-multibranch__P4QsceG",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "b569c7f37491065e1c14c8074024ffa47cad6f9c4e797213af81ef8617bccb9c",
+          "started_at": "2026-10-16T03:59:06.218940Z",
+          "finished_at": "2026-10-16T04:04:39.976130Z",
+          "seconds": 333.757,
+          "agent_seconds": 93.56,
+          "verifier_seconds": 228.506,
+          "usage_reported": {
+            "n_input_tokens": 144813,
+            "n_cache_tokens": 134656,
+            "n_output_tokens": 2244,
+            "cost_usd": 0.348426,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 144813,
+                "n_cache_tokens": 134656,
+                "n_output_tokens": 2244,
+                "cost_usd": 0.348426
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "481df6b44afdcb68529b20166c2e573f7054fdc223cd8b2c85a8199b6ab43149",
+          "verifier_stdout_sha256": "1c75f633c7953cb3f59a49f2f676fc31f2631b0f1b47e06c7ac20efee825478f",
+          "trajectory_sha256": "767b6c49fffa770e17d194990e1a4ea0a51ddc5a82c6afece92ef573a5c74c15"
+        },
+        {
+          "task": "multi-source-data-merger",
+          "trial": "multi-source-data-merger__i5xJmNW",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "0f86ced6d81948760d828ee03060c28c44eb7244e7ef72442c18dc1c71115280",
+          "started_at": "2026-10-16T03:54:57.012669Z",
+          "finished_at": "2026-10-16T03:59:06.214547Z",
+          "seconds": 249.202,
+          "agent_seconds": 70.109,
+          "verifier_seconds": 167.273,
+          "usage_reported": {
+            "n_input_tokens": 61814,
+            "n_cache_tokens": 53376,
+            "n_output_tokens": 1403,
+            "cost_usd": 0.207906,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 61814,
+                "n_cache_tokens": 53376,
+                "n_output_tokens": 1403,
+                "cost_usd": 0.207906
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "921d7dabc93eee004d57e929e77fd90296bfe851de49771cced3118d7de7e402",
+          "verifier_stdout_sha256": "9404b02829bc64006c072a259928db3bf8364fc575f01895105334bd1b7e0e5d",
+          "trajectory_sha256": "4bb5598ceba7443b5a8a1d68724cbe11a76aaa4350544fc12b061cbdbeae523f"
+        },
+        {
+          "task": "regex-log",
+          "trial": "regex-log__Kw8UMGc",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "21c195b5984842dcef348132035504459514fc9ba31d1d813a82e59aa784dcc9",
+          "started_at": "2026-10-16T03:49:06.843299Z",
+          "finished_at": "2026-10-16T03:54:57.007762Z",
+          "seconds": 350.164,
+          "agent_seconds": 80.288,
+          "verifier_seconds": 254.718,
+          "usage_reported": {
+            "n_input_tokens": 76710,
+            "n_cache_tokens": 71552,
+            "n_output_tokens": 1895,
+            "cost_usd": 0.217882,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 76710,
+                "n_cache_tokens": 71552,
+                "n_output_tokens": 1895,
+                "cost_usd": 0.217882
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "336e854952d2d45072b7e604463892b29b3c1707efe814aca3f050ba2f0b8558",
+          "verifier_stdout_sha256": "87b01ed6d689fcce7c4253b032448fb8029d6f743eca9145c4909bbc302e1f7c",
+          "trajectory_sha256": "90cb302e1ec3db47d089efa956fa670b31072a1927eb677c25809b05c8639522"
+        }
+      ]
+    },
+    {
+      "incomplete_trials": [],
+      "id": "batch-005",
+      "started": true,
+      "complete_valid_aggregate": true,
+      "failed_or_interrupted": false,
+      "pilot_contract_sha256": "9ab7970765f00efad788ea3257804e49d0e9b88039b265b9f2484fa2313dccf1",
+      "job_sha256": "746a97520760842a1389a9134546d69e0e37ad0a4595cf73c13b0b15f18f3058",
+      "runtime_digest": "ad896e23f7ef62a94abc8a8b6e1eb022a2a4205de0274a11ba3a03c902495662",
+      "prompt_sha256": "e4545f14e01e9f95d940d36005f7b3e598ec9943576c3ff8528c760b0519da1b",
+      "agent_cap_seconds": 300.0,
+      "batch_cap_seconds": 1200.0,
+      "trials": [
+        {
+          "task": "custom-memory-heap-crash",
+          "trial": "custom-memory-heap-crash__Ky7UXJd",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "fba0e3be977223b1f8c182da8411663258f83b3563dd5dcd12beae87762ccabf",
+          "started_at": "2026-10-16T04:13:37.920847Z",
+          "finished_at": "2026-10-16T04:18:29.164950Z",
+          "seconds": 291.244,
+          "agent_seconds": 90.637,
+          "verifier_seconds": 188.861,
+          "usage_reported": {
+            "n_input_tokens": 200704,
+            "n_cache_tokens": 182656,
+            "n_output_tokens": 1189,
+            "cost_usd": 0.422586,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 200704,
+                "n_cache_tokens": 182656,
+                "n_output_tokens": 1189,
+                "cost_usd": 0.422586
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "3d4f7f58556f93aea03d1977be557ceede4feea394d6d968cdaa5211a22156d1",
+          "verifier_stdout_sha256": "ee4ecebdd6122c2a497573f7fb1fb481e7e99ca162b59223136b7d8eb732164b",
+          "trajectory_sha256": "3f64eec00a3d5a07b4991e92d8d5f3c87dc7aa9f9590a9bd0d499848c669a88f"
+        },
+        {
+          "task": "sqlite-db-truncate",
+          "trial": "sqlite-db-truncate__JhKLqJu",
+          "score": 1.0,
+          "exception_type": null,
+          "task_checksum": "2346f11dbe5b7bad30e9a9bcb27e5276a73f324d62c452d898e4ce0e472583b1",
+          "started_at": "2026-10-16T04:10:50.611105Z",
+          "finished_at": "2026-10-16T04:13:37.916839Z",
+          "seconds": 167.306,
+          "agent_seconds": 59.229,
+          "verifier_seconds": 93.384,
+          "usage_reported": {
+            "n_input_tokens": 92718,
+            "n_cache_tokens": 76800,
+            "n_output_tokens": 1053,
+            "cost_usd": 0.28863,
+            "model_usage": {
+              "openai/gpt-6-astra": {
+                "n_input_tokens": 92718,
+                "n_cache_tokens": 76800,
+                "n_output_tokens": 1053,
+                "cost_usd": 0.28863
+              }
+            },
+            "rollout_details": null,
+            "metadata": null
+          },
+          "result_sha256": "b29be37ab3a2c897f6a91fb83d43de429509211d95b8c91058d71cb88a8b4e9d",
+          "verifier_stdout_sha256": "2d7b4a086ab1be109b98fda2e993b69763ab5ef48aff71b732913bf42311205a",
+          "trajectory_sha256": "17c547cb4c9a04fc54074ba34046cdac7b80e387db9164d72a325ec4b3678881"
+        }
+      ]
+    }
+  ],
+  "infrastructure_notes": {
+    "batch_001": "WAL valid 1.0; other three agent_setup errors, no agent_execution.",
+    "batch_002": "Prepared only; never started.",
+    "batch_003": "Codex regex-log launched but model stream repeatedly timed out; stopped before any completed turn. Billing unknown; not a score. No task results were accepted.",
+    "evidence": "Unauthenticated network probe: direct model endpoint connection timed out, proxy returned HTTP 405.",
+    "batch_004": "New explicit trial batch after transport fix; fixed container-only proxy, TLS verification remains enabled; localhost bypassed.",
+    "budget": "Same 300-second agent cap, serial trials, at most 1500 seconds for new batch; previous failures retained.",
+    "cleanup": "Stopped batch-003 container removed after batch-004 completed; local trial logs retained."
+  },
+  "core_fingerprint": "5d17b49e19d5d138aa0bbf4635444301f475bfd489993fc496ebf21c4c788249",
+  "pilot_script_sha256": "0f599c76da198c62622bc6071523c172576add89ca47a0a7d05a248ad4e9a7d4",
+  "reserve_activation": {
+    "reason": "All four primary tasks have complete valid reward 1.0, no exception. Activate the two predeclared reserves; do not expand beyond six screened tasks.",
+    "primary_trials": [
+      "db-wal-recovery__483S3tM",
+      "regex-log__Kw8UMGc",
+      "multi-source-data-merger__i5xJmNW",
+      "git-multibranch__P4QsceG"
+    ],
+    "agent_cap_seconds": 300,
+    "batch_cap_seconds": 1200,
+    "runtime": "prepared-runtime-v2, same as batch-004",
+    "daemon_change": "Container-only model proxy unchanged; owned idle VM Docker daemon registry proxy configured to permit pulling reserve images. No active containers during restart."
+  },
+  "validation": {
+    "python": "3.12",
+    "tests_passed": 71,
+    "log_sha256": "fed6cefa1adb593295271f271f67f0030952d3936e5aeba3318737e32533dbb7"
+  },
+  "limitations": [
+    "Screening observations across explicitly changed runtime/network configurations are not a common A/B/C baseline.",
+    "Single sample per completed task; no measured harness improvement or search-strategy comparison.",
+    "Batch-003 launched Codex but no completed turn was accepted. Billing remains unknown; reported completed-trial costs are not total billing.",
+    "Task images and source revision are identified; upstream verifier dependency downloads remain mutable.",
+    "Public evidence contains hashes and summaries; raw logs and runtime binaries remain local."
+  ],
+  "outcome": {
+    "valid_completed_tasks": 6,
+    "tasks_below_perfect": 0,
+    "selection_gate_met": false,
+    "search_set_frozen": false,
+    "abc_started": false,
+    "search_enhancements_implemented": false,
+    "completed_agent_seconds": 464.327,
+    "completed_trial_seconds": 1662.016,
+    "reported_completed_trial_cost_usd": 1.684294,
+    "cost_note": "Harbor-reported estimate for completed trials only; excludes uncertain batch-003 billing, setup/network attempts, and local infrastructure. Not an actual invoice.",
+    "decision": "Stop at the predeclared six-task screening cap. Retain passing tasks as regression candidates. Do not run A/B/C or claim harness improvement from these ceiling scores. A later bounded screen should use harder public tasks without changing the seed/model or using heldout feedback."
+  },
+  "public_task_metadata": [
+    {
+      "task": "db-wal-recovery",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "5a20375162921b8911c67035d1905df7fd335d1bed03044271e608b2c3c93b26",
+      "task_toml_sha256": "2ff8fa659f95fd16932114f50d16c44229ffeb05f116c6f9e0c7b6b376e087e2"
+    },
+    {
+      "task": "regex-log",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "4f7ac05e70cf9220ea0f1e5a052c5f908cd0fa884e847d80b0bd51bae2e96f9c",
+      "task_toml_sha256": "cbffabfe62b495480b06a8a34dfa3b11bd5a86ff20b0c82a1406491b6f50665c"
+    },
+    {
+      "task": "multi-source-data-merger",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "d1d28bb6e37f7a255a1b7f78aae8591f35c0494f33e4913392424ad954aab944",
+      "task_toml_sha256": "fc843176948791287d9d9cb0d31b1da0b4e5734d2c68b8d3746ceab5abdc559a"
+    },
+    {
+      "task": "git-multibranch",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "54014a38d7526d65faeb6c11d9b7ed3d4a5cb5d973d68d3da3b68b8c0289e125",
+      "task_toml_sha256": "6b4ebf49a9ece91b7c8161917a9ac6ec91d00aea9d01dc7695b7a4a5fb3eed5b"
+    },
+    {
+      "task": "sqlite-db-truncate",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "465c135cd80be49023ea3ecf8f1d840c679b3a960efe425d510894e417b9d802",
+      "task_toml_sha256": "8b4c4d2abfe7dc8b7a3bac4567f60c08f7a9219b2cc65df0de7c5ee3d37721d6"
+    },
+    {
+      "task": "custom-memory-heap-crash",
+      "upstream_difficulty": "medium",
+      "instruction_sha256": "53c68ae14a3c3af9a97c40bfd9bdc30a5d98b37eaa2f69f763475745f70f108d",
+      "task_toml_sha256": "7642b99bb9af870eeefa26e21681a7308b5b4fb9eb249a4255019a6da40cb6c1"
+    }
+  ],
+  "cleanup": {
+    "active_containers_at_end": 0,
+    "images_verified_after_run": [
+      {
+        "task": "db-wal-recovery",
+        "same_image_id_after_run": true
+      },
+      {
+        "task": "regex-log",
+        "same_image_id_after_run": true
+      },
+      {
+        "task": "multi-source-data-merger",
+        "same_image_id_after_run": true
+      },
+      {
+        "task": "git-multibranch",
+        "same_image_id_after_run": true
+      },
+      {
+        "task": "sqlite-db-truncate",
+        "same_image_id_after_run": true
+      },
+      {
+        "task": "custom-memory-heap-crash",
+        "same_image_id_after_run": true
+      }
+    ],
+    "vm_stopped": true
+  }
+}

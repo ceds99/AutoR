@@ -11,6 +11,61 @@ from autor.storage import AutorError, read_json, write_json
 
 
 class TerminalBenchPilotTests(unittest.TestCase):
+    def test_network_proxy_is_container_only_and_preserves_local_endpoints(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "runtime"
+            source.mkdir()
+            (source / "node").write_text("fixture")
+            root = Path(temp) / "pilot"
+            pilot.prepare(root, "fixture", "0.153.4", "a" * 64, node_runtime=source,
+                          network_proxy="http://proxy.example:3128")
+            profile = (root / "runtime/node-profile.sh").read_text()
+            self.assertIn('export HTTPS_PROXY=http://proxy.example:3128', profile)
+            self.assertIn('export NO_PROXY=localhost,127.0.0.1,::1', profile)
+            self.assertEqual(read_json(root / "search-job.json")["environment"]["env"],
+                             {"BASH_ENV": "/etc/profile.d/autor-node.sh"})
+            (root / "runtime/node-profile.sh").write_text(profile.replace("3128", "3129"))
+            with self.assertRaisesRegex(AutorError, "runtime override changed"):
+                pilot.load(root)
+
+    def test_apt_proxy_is_explicit_frozen_and_has_no_credentials(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "pilot"
+            pilot.prepare(root, "fixture", "0.153.4", "a" * 64, bounded_apt=True,
+                          apt_proxy="http://proxy.example:3128")
+            config = (root / "runtime/apt-network.conf").read_text()
+            self.assertIn('Acquire::http::Proxy "http://proxy.example:3128";', config)
+            self.assertIn('Acquire::https::Proxy "http://proxy.example:3128";', config)
+            (root / "runtime/apt-network.conf").write_text(config.replace("3128", "3129"))
+            with self.assertRaisesRegex(AutorError, "runtime override changed"):
+                pilot.load(root)
+            for index, proxy in enumerate(["http://user:secret@proxy", "http://proxy?token=x", "file:///tmp", "http://proxy\n"]):
+                with self.subTest(proxy=proxy), self.assertRaises(AutorError):
+                    pilot.prepare(Path(temp) / str(index), "fixture", "0.153.4", "a" * 64,
+                                  bounded_apt=True, apt_proxy=proxy)
+
+    def test_explicit_search_selection_and_budgets_are_frozen(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "pilot"
+            meta = pilot.prepare(root, "fixture", "0.153.4", "a" * 64,
+                                 task_names=["regex-log", "db-wal-recovery"], agent_timeout=300, max_seconds=1800)
+            job = read_json(root / "search-job.json")
+            self.assertEqual([t["path"] for t in job["tasks"]], ["regex-log", "db-wal-recovery"])
+            self.assertEqual(job["agents"][0]["max_timeout_sec"], 300)
+            self.assertEqual(meta["max_seconds"], 1800)
+            job["tasks"].reverse()
+            write_json(root / "search-job.json", job)
+            with self.assertRaisesRegex(AutorError, "job changed"):
+                pilot.load(root)
+
+    def test_invalid_search_selection_or_budget_rejected(self):
+        cases = [{"task_names": x} for x in ([], ["x", "x"], ["../x"], ["fix-*"], ["x"] * 7)]
+        cases += [{"agent_timeout": 0}, {"max_seconds": float("inf")}, {"agent_timeout": True}]
+        with tempfile.TemporaryDirectory() as temp:
+            for index, kwargs in enumerate(cases):
+                with self.subTest(kwargs=kwargs), self.assertRaises(AutorError):
+                    pilot.prepare(Path(temp) / str(index), "fixture", "0.153.4", "a" * 64, **kwargs)
+
     def test_prepare_is_search_only_and_pinned(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / "pilot"

@@ -172,7 +172,7 @@ python3 scripts/accept_release.py \
 
 ## Harbor 0.24.0 路径
 
-### 当前优先：固定四题的 baseline pilot
+### baseline pilot 与任务筛选
 
 这条入口不调用 outer，只用未修改的 inner 测量搜索任务。先由评测维护者在搜索环境之外固定两道保留任务清单，加入随机 salt/nonce，计算该文件原始字节的 SHA-256；只把摘要交给准备命令，勿传入清单、题名或评测结果。
 
@@ -187,9 +187,21 @@ uv run --python 3.12 --with harbor==0.24.0 \
   python scripts/terminal_bench_pilot.py run runs/tb-pilot
 ```
 
-Harbor 的 inner 认证不同于宿主机 Codex 自动登录：默认使用 OPENAI_API_KEY；若明确使用已有 ChatGPT 登录文件，可在执行环境设置 `CODEX_FORCE_AUTH_JSON=1`，或用 `CODEX_AUTH_JSON_PATH` 指向该环境的登录文件。这些选项已从 Harbor 0.24.0 的 Codex adapter 核实，但当前未完成真实容器认证验证。预检只检查文件/环境变量是否存在，不读取或打印凭据值；不要把凭据提交到仓库。
+Harbor 的 inner 认证不同于宿主机 Codex 自动登录：默认使用 OPENAI_API_KEY；若明确使用已有 ChatGPT 登录文件，可在执行环境设置 `CODEX_FORCE_AUTH_JSON=1`，或用 `CODEX_AUTH_JSON_PATH` 指向该环境的登录文件。这些选项已从 Harbor 0.24.0 的 Codex adapter 核实，并在真实容器运行中使用。预检只检查文件/环境变量是否存在，不读取或打印凭据值；不要把凭据提交到仓库。
 
-准备与 check 不调用模型；run 最多串行执行四次 inner，预算总计 1200 秒，每题 agent 上限 180 秒。它冻结 job 和 prompt，拒绝变更或自动重放已有 started.json。启动后中断时，需要检查 Docker 是否还有残留作业；本地进程取消不等于 daemon 内容器一定已清理。
+准备与 check 不调用模型；默认 run 最多串行执行原四道任务，预算总计 1200 秒，每题 agent 上限 180 秒。新实验可重复传入 `--task`，显式选择 1–6 个唯一任务名，并用 `--agent-timeout`、`--max-seconds` 设置正数时间上限。它冻结任务顺序、job、prompt 和运行时摘要，拒绝变更或自动重放已有 started.json。启动后中断时，需要检查 Docker 是否还有残留作业；本地进程取消不等于 daemon 内容器一定已清理。
+
+任务筛选示例（新目录；这不是 A/B/C 对照）：
+
+```bash
+python3 scripts/terminal_bench_pilot.py prepare runs/tb-selection \
+  --inner-model openai/gpt-6-astra --inner-version 0.153.4 \
+  --holdout-commitment '<独立清单的 SHA-256>' \
+  --task db-wal-recovery --task regex-log \
+  --task multi-source-data-merger --task git-multibranch \
+  --agent-timeout 300 --max-seconds 1800 \
+  --bounded-apt --node-runtime '/path/to/prepared-linux-runtime'
+```
 
 完成后查看 baseline-result.json 与 jobs/evaluation 下的逐题日志。任务异常或缺失会生成 failure.json，不给整轮伪造零分。先判断真实失败是否可分析，再创建 inner 比较实验；当前脚本不会自动启动搜索，也不会访问保留任务。镜像架构、npm 版本和模型可用性需要环境就绪后的 smoke 验证。
 
@@ -218,9 +230,19 @@ python3 scripts/terminal_bench_pilot.py prepare runs/tb-new \
   --bounded-apt --node-runtime '/path/to/node-v22.23.3-linux-x64'
 ```
 
-`--bounded-apt` 固定 APT HTTP/HTTPS 超时为 15 秒、重试为 0。Node、APT 配置和 shell 启动文件均只读挂载并核对摘要；变更需新建实验。Harbor 按原逻辑安装其余依赖和 Codex；不改任务说明、模型、评分器或答案。容器用 `BASH_ENV` 引入 Node，避免设置 `PATH` 影响 Harbor 宿主侧 Docker 命令。共享 VM 时，新 pilot 目录及运行时必须位于明确挂载的目录内。
+`--bounded-apt` 固定 APT HTTP/HTTPS 超时为 15 秒、重试为 0。可加 `--apt-proxy '<容器可达的 HTTP(S) 代理 origin>'`，代理不得含账号、密码或查询参数。Node、APT 配置和 shell 启动文件均只读挂载并核对摘要；变更需新建实验。Harbor 按原逻辑安装缺失依赖；不改任务说明、模型、评分器或答案。容器用 `BASH_ENV` 引入 Node，避免设置 `PATH` 影响 Harbor 宿主侧 Docker 命令。共享 VM 时，新 pilot 目录及运行时必须位于明确挂载的目录内。
 
-这是记录在案的 pilot 运行条件，不等同于官方排行榜环境。每次启动应保留镜像 digest、架构、CLI 实际版本和依赖安装日志。失败运行保留原目录；只在确认未进入模型执行、定位问题后人工建立新的尝试，不重放不确定调用。
+为避免重复在线安装，可以在这个发行目录中预置相同版本的 Linux `bin/codex`、`bin/rg` 和所需运行工具。Harbor 0.24.0 会检查 `codex --version`，已符合要求时跳过安装。必须记录来源、校验和、实际版本和完整 runtime digest；不能把不同版本程序标为同一 harness。
+
+本次筛选使用了官方 npm 发布的 Codex 0.153.4 Linux x64 包（校验 SHA-512），Node 22.23.3，以及已有固定任务镜像中的系统 curl 8.5.0 和其共享库。只复制系统工具，不复制任务数据、参考解或测试。curl 使用私有 loader 路径，不替换容器系统库。运行时可包含 `ca-certificates.crt` 公共信任证书包；profile 会设置 `SSL_CERT_FILE`，证书字节计入摘要，TLS 校验保持开启。这是本地 pilot 的预置运行环境，不是新的发布产物；跨机器重建须核对本地凭证中的全部摘要。
+
+若模型服务也需要代理，使用 `--network-proxy '<容器可达的代理 origin>'`（要求提供 `--node-runtime`）。代理只写入容器内 profile，不注入宿主 Docker 命令环境；HTTP/HTTPS 均设置，localhost、127.0.0.1 和 ::1 绕过代理，避免破坏任务内本地服务访问。APT 与模型网络分别诊断；可用未认证的服务探测验证网络，但 HTTP 响应不代表认证和真实模型调用已成功。
+
+这是记录在案的 pilot 运行条件，不等同于官方排行榜环境。每次启动应保留镜像 digest、架构、CLI 实际版本和依赖安装日志。失败运行保留原目录，不自动重放不确定调用。故障归因后需要补测时，先确认旧进程和容器已停止，再显式创建新配置和新目录，说明改变的条件；已发出但未收到响应的模型请求应记录费用未知，不宣称零调用或零成本。
+
+2026-10-16 筛选实测：另选的四道主任务和两道备选均为 1.0，选题门槛未满足；未启动 A/B/C。详见 [筛选凭证](evidence/task-selection.json)，包含有效成绩、失败尝试、运行时/镜像摘要与预算。安装失败不算任务失败；中断模型请求的费用未知。完整原始日志和预置二进制只保存在本地。
+
+准备镜像时如果宿主可联网、Docker daemon 拉取却超时，应单独检查 daemon 的网络配置。修改专用 VM 的 daemon 代理前先确认没有运行中的试验并备份原配置；这与容器内模型代理是两层配置。结束实验后核对残留容器，清理本次创建的容器并停止专用 VM。
 
 ### 原有单轮 outer + Harbor 入口
 

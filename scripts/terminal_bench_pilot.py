@@ -10,15 +10,18 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import time
+from urllib.parse import urlsplit
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from autor import adapters
+from autor.config import finite_number
 from autor.presets import SEED_PROMPT
 from autor.process import run_process
 from autor.storage import AutorError, digest, read_json, write_json
@@ -47,7 +50,8 @@ def runtime_digest(root):
     return digest(entries)
 
 
-def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_runtime=None):
+def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_runtime=None,
+            task_names=None, agent_timeout=180, max_seconds=1200, apt_proxy=None, network_proxy=None):
     root = Path(root).resolve()
     if root.exists():
         raise AutorError("Choose a new pilot directory")
@@ -55,23 +59,45 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
         raise AutorError("Supply the SHA-256 commitment of a salted, separately stored holdout manifest")
     if not model.strip() or not re.fullmatch(r"\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?", version):
         raise AutorError("An explicit model and exact Codex npm version are required")
+    tasks = list(SEARCH_TASKS if task_names is None else task_names)
+    if (not 1 <= len(tasks) <= 6 or any(not isinstance(t, str) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", t) for t in tasks)
+            or len(set(tasks)) != len(tasks)):
+        raise AutorError("Choose 1–6 unique exact search task names")
+    if any(not finite_number(v) or v <= 0 for v in (agent_timeout, max_seconds)):
+        raise AutorError("Agent and pilot time budgets must be positive finite seconds")
+    if apt_proxy is not None and not bounded_apt:
+        raise AutorError("APT proxy requires --bounded-apt")
+    if network_proxy is not None and node_runtime is None:
+        raise AutorError("Network proxy requires --node-runtime for the container-only profile")
+    for proxy in (apt_proxy, network_proxy):
+        if proxy is None:
+            continue
+        parsed = urlsplit(proxy)
+        if (parsed.scheme not in ("http", "https") or not parsed.hostname
+                or parsed.username or parsed.password or parsed.query or parsed.fragment
+                or parsed.path not in ("", "/") or any(c.isspace() for c in proxy)):
+            raise AutorError("Proxy must be an HTTP(S) origin without credentials")
     harness = root / "harness"
     harness.mkdir(parents=True)
     (harness / "prompt.md").write_text(SEED_PROMPT, encoding="utf-8")
     settings = {"kind": "harbor", "model": model, "agent_version": version,
-                "dataset": "terminal-bench", "dataset_version": "2.0", "task_names": SEARCH_TASKS,
-                "attempts": 1, "metric": "reward", "agent_timeout": 180}
+                "dataset": "terminal-bench", "dataset_version": "2.0", "task_names": tasks,
+                "attempts": 1, "metric": "reward", "agent_timeout": agent_timeout}
     job = adapters.harbor_config(settings, harness, root)
     # Pin explicit task commits instead of resolving a mutable remote registry at run time.
     job["datasets"] = []
     job["tasks"] = [{"path": name, "git_url": "https://github.com/harbor-framework/terminal-bench-2.git",
-                     "git_commit_id": REVISION, "source": "terminal-bench-2.0-pilot"} for name in SEARCH_TASKS]
+                     "git_commit_id": REVISION, "source": "terminal-bench-2.0-pilot"} for name in tasks]
     job["agents"][0]["kwargs"]["reasoning_effort"] = "low"
     overrides = {}
     if bounded_apt:
         apt_path = root / "runtime/apt-network.conf"
         apt_path.parent.mkdir(parents=True, exist_ok=True)
-        apt_path.write_text(APT_CONFIG, encoding="utf-8")
+        apt_config = APT_CONFIG
+        if apt_proxy:
+            apt_config += 'Acquire::http::Proxy ' + json.dumps(apt_proxy) + ';\n'
+            apt_config += 'Acquire::https::Proxy ' + json.dumps(apt_proxy) + ';\n'
+        apt_path.write_text(apt_config, encoding="utf-8")
         overrides["runtime/apt-network.conf"] = hashlib.sha256(apt_path.read_bytes()).hexdigest()
         job["environment"]["mounts"] = [{"type": "bind", "source": str(apt_path),
             "target": "/etc/apt/apt.conf.d/99autor-pilot-network", "read_only": True}]
@@ -88,7 +114,15 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
         job["environment"]["env"] = {"BASH_ENV": "/etc/profile.d/autor-node.sh"}
         # Source this in container bash commands without replacing the host Docker client PATH.
         profile_path = root / "runtime/node-profile.sh"
-        profile_path.write_text('export PATH="/opt/autor-node/bin:$PATH"\n', encoding="utf-8")
+        profile = ('export PATH="/opt/autor-node/bin:$PATH"\n'
+                   'if [ -r /opt/autor-node/ca-certificates.crt ]; then\n'
+                   '  export SSL_CERT_FILE=/opt/autor-node/ca-certificates.crt\n'
+                   'fi\n')
+        if network_proxy:
+            for name in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
+                profile += 'export ' + name + '=' + shlex.quote(network_proxy) + '\n'
+            profile += 'export NO_PROXY=localhost,127.0.0.1,::1\nexport no_proxy="$NO_PROXY"\n'
+        profile_path.write_text(profile, encoding="utf-8")
         overrides["runtime/node-profile.sh"] = hashlib.sha256(profile_path.read_bytes()).hexdigest()
         job["environment"]["mounts"].append({"type": "bind", "source": str(profile_path),
             "target": "/etc/profile.d/autor-node.sh", "read_only": True})
@@ -96,7 +130,7 @@ def prepare(root, model, version, holdout_commitment, bounded_apt=False, node_ru
     metadata = {"schema_version": 1, "mode": "baseline-only", "evaluator": settings,
                 "task_revision": REVISION, "holdout_count": 2, "holdout_commitment": holdout_commitment,
                 "job_hash": digest(job), "prompt_sha256": hashlib.sha256((harness / "prompt.md").read_bytes()).hexdigest(),
-                "max_seconds": 1200, "runtime_overrides": overrides, "limitations": "Short-budget pilot, not an official leaderboard score. No holdout data is loaded and no proposer is called."}
+                "max_seconds": max_seconds, "runtime_overrides": overrides, "limitations": "Short-budget pilot, not an official leaderboard score. No holdout data is loaded and no proposer is called."}
     write_json(root / "pilot.json", metadata)
     write_json(root / "contract.json", {"pilot_sha256": digest(metadata)})
     return metadata
@@ -185,12 +219,19 @@ def main():
     init.add_argument("--holdout-commitment", required=True)
     init.add_argument("--node-runtime", type=Path, help="Stage a trusted extracted Linux Node distribution as a hashed read-only runtime mount")
     init.add_argument("--bounded-apt", action="store_true", help="Freeze an APT 15-second connection timeout with no retries; recorded runtime deviation")
+    init.add_argument("--apt-proxy", help="Optional credential-free proxy origin reachable from the container; requires --bounded-apt and is frozen in the runtime receipt")
+    init.add_argument("--network-proxy", help="Optional credential-free HTTP(S) proxy for container commands only; requires --node-runtime; loopback traffic bypasses it")
+    init.add_argument("--task", action="append", help="Exact search task name; repeat for 1–6 tasks. Defaults to the original four-task pilot.")
+    init.add_argument("--agent-timeout", type=float, default=180)
+    init.add_argument("--max-seconds", type=float, default=1200)
     for command in ("check", "run"):
         sub.add_parser(command).add_argument("root", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "prepare":
-            result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment, args.bounded_apt, args.node_runtime)
+            result = prepare(args.root, args.inner_model, args.inner_version, args.holdout_commitment,
+                             args.bounded_apt, args.node_runtime, args.task, args.agent_timeout, args.max_seconds,
+                             args.apt_proxy, args.network_proxy)
         elif args.command == "check":
             result = preflight(args.root)
             write_json(args.root / "preflight.json", result)
