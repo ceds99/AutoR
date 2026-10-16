@@ -201,5 +201,11 @@
     "gate_allowed": true,
     "baseline_source": "abc-search-003",
     "continuation": "abc-search-004"
+  },
+  "proposer_calls_scope": "Screening only; subsequent search results are in adaptive-search.json.",
+  "search_followup": {
+    "experiment": "abc-search-004",
+    "status": "real-search-complete-with-budget-limits",
+    "evidence": "adaptive-search.json"
   }
 }
