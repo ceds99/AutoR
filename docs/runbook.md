@@ -341,3 +341,5 @@ JSON 配置使用 `strategy: "adaptive_beam"`，`search` 支持 `beam_width`、`
 ARM 宿主使用已有 x86 inner 运行时，可通过 `--docker-platform linux/amd64` 冻结 agent Compose overlay；需安装支持平台选择的 Docker Buildx，并检查实际镜像架构。独立 verifier 保持其原生架构，必须另记镜像回执；同一对照各组固定相同运行条件。对每次重新构建的镜像，回执还应包含 `project_suffix` 和 `content_sha256`；wrapper 在接纳分数前比较实际镜像文件层及配置，仅忽略随 trial 改变的 Compose project 标签。该选项不会修改任务 Dockerfile、评分器或任务时间限制；pilot 的 agent 上限仍须显式记录。
 
 筛选时可加 `--keep-images` 保留构建镜像以制作回执；容器仍由 Compose down 移除。正式 wrapper 自动采用该清理方式，验收分数前核对实际构建内容。若筛选镜像已被清理，可用同源 `nop` 预热重新取得回执；预热不调用模型，其分数不得作为任务筛选或策略比较结果。
+
+`compare_search prepare` 在任何昂贵测量前校验 outer CLI：`--codex-version` 接受纯版本号或完整输出，配置统一保存实际的 `codex-cli …` 字符串；search 也先检查版本。此前纯版本号格式错误造成 6 次模型调用前的提案拒绝。本轮修复采用新实验：重新核验已完成基线的分数、任务、激活和镜像后沿用原样本，同时计入原来的全部评测、失败预留和耗时。原实验不覆盖、不重放；迁移凭证见最新实验 JSON。这是本轮经检查的恢复，尚不是通用的自动迁移命令。

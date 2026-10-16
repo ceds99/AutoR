@@ -1,15 +1,15 @@
 {
   "date": "2026-10-16",
   "version": "0.2.0.dev2",
-  "status": "cargo-baseline-reproduction-running",
+  "status": "real-search-running",
   "outer_hash": "15b455ae541c4a582f18bd9b423ddfe2f519b9d3ab2ac6d6129533b1a278321a",
   "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b",
-  "comparison_runner_sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
+  "comparison_runner_sha256": "a2868dd3cc73d111155f6542610bd5b6c1ae70dba541db938b276e9440730e6e",
   "tests": {
-    "passed": 102,
+    "passed": 105,
     "python": "3.12",
     "harbor": "0.24.0",
-    "log_sha256": "5906019584eb7a9a99937a269cc82cdad6d3cd55baa145bed60634c00a9f17d4"
+    "log_sha256": "bef804a329e36f73a6e822674a994aaf1cb540e39f0df667ad9dc2d9306dfba0"
   },
   "synthetic_comparison": {
     "synthetic": true,
@@ -469,15 +469,15 @@
     }
   },
   "real_comparison": {
-    "name": "abc-search-003",
+    "name": "abc-search-004",
     "started": true,
-    "phase": "baseline-reproduction",
+    "phase": "real-search-running",
     "selected_tasks": [
       "terminal-bench/cargo-flight-dispatch",
       "terminal-bench/batched-eval-parity"
     ],
-    "search_started": false,
-    "plan_hash": "44cbf73efc7638ec18906261028e09a29740012e4b963374319100df64bd7651",
+    "search_started": true,
+    "plan_hash": "fded34ac2d2dc8612bc0553cc80588b7791fedad8c53a98e4ab57185386c976a",
     "budget_per_arm": {
       "max_proposals": 6,
       "max_evaluations": 8,
@@ -487,7 +487,209 @@
     },
     "max_task_trials_per_arm": 16,
     "holdout_evaluated": false,
-    "reason": "Cargo screening produced eight concrete assertion failures; all arms must reproduce the selected failure before proposals."
+    "baseline_adoption": {
+      "source": "abc-search-003",
+      "destination": "abc-search-004",
+      "reason": "Correct numeric-only outer CLI version pin to its exact full output; no model/version/prompt/evaluator/resource change.",
+      "source_gate_sha256": "848e1efda4f16380c0652e7cc4bcb7df6ae7b66d1c0e2399674d9f5f51f9bda6",
+      "model_calls_added_by_adoption": 0,
+      "arms": {
+        "A": {
+          "source_state_sha256": "18157bfed61d21b1c296f4f5fdb7f4b324c6c7df1e11b37c62a1c2de5d0e8cbb",
+          "source_seed_sha256": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151",
+          "carried_proposal_reservations": 2,
+          "carried_evaluations": 1,
+          "carried_seconds": 571.5222189570013,
+          "verified_trials": [
+            {
+              "trial": "batched-eval-parity__2KDRy7v",
+              "result_sha256": "79a29d9c7763e3522ecbc66ece6e4ef63bdcc27be96a5e92f84c910d1618818a",
+              "score": 0.0
+            },
+            {
+              "trial": "cargo-flight-dispatch__T9AvNsV",
+              "result_sha256": "f81f1189b59e955927d90a904f608b4f9cab61c7f7e23c8ed50367c9ac32ff93",
+              "score": 0.0
+            }
+          ]
+        },
+        "B": {
+          "source_state_sha256": "4f7bbc11bd1895189c8fd70d085297d9768d0bb1adedbcf9a7d98e7432ec83bf",
+          "source_seed_sha256": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151",
+          "carried_proposal_reservations": 2,
+          "carried_evaluations": 2,
+          "carried_seconds": 1139.3898417920027,
+          "verified_trials": [
+            {
+              "trial": "batched-eval-parity__WpAFEw7",
+              "result_sha256": "7bb99af49682cf86d3ed86e4e5119b76a6cb3c6653e972b9537797f8b9f3ad87",
+              "score": 0.0
+            },
+            {
+              "trial": "cargo-flight-dispatch__Dzr5JED",
+              "result_sha256": "bc57f3219cc654ddc981cc32eafbf7389122de420e946d21b50a2501f43f4552",
+              "score": 0.0
+            },
+            {
+              "trial": "batched-eval-parity__AzNxi6k",
+              "result_sha256": "474d1e97cd3664dd1cec6ed28bd9f7deec5ab1d5083fd97ff1b8ea0f99d50dd4",
+              "score": 0.0
+            },
+            {
+              "trial": "cargo-flight-dispatch__hqMjnVY",
+              "result_sha256": "80ebb531f80ba2f07fffca686a293111fcab39271c96c8ba1f8a26a04db0c3a4",
+              "score": 0.0
+            }
+          ]
+        },
+        "C": {
+          "source_state_sha256": "8fabe2d6e11b3d28dcefa9247bf15093896ff1f5242900a9a1b3df61d5d8a98c",
+          "source_seed_sha256": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151",
+          "carried_proposal_reservations": 2,
+          "carried_evaluations": 2,
+          "carried_seconds": 1052.2841682930048,
+          "verified_trials": [
+            {
+              "trial": "batched-eval-parity__qujvhCM",
+              "result_sha256": "3223eff3a3a16f3524e8f756a913c396752d812015c9e8e8111dd0a0bf58cd26",
+              "score": 0.0
+            },
+            {
+              "trial": "cargo-flight-dispatch__Fz2Ns74",
+              "result_sha256": "4d49da72d2e4f84cf2fe4ea62b3f69b3c78afc3095e223a627440c558b1c0bf6",
+              "score": 0.0
+            },
+            {
+              "trial": "batched-eval-parity__hc9YySa",
+              "result_sha256": "dec7910def70be1a5dd3c02e0ee4c93d38f5296b38a7394d6db2090bfb905e6d",
+              "score": 0.0
+            },
+            {
+              "trial": "cargo-flight-dispatch__w3C5EHN",
+              "result_sha256": "7e867350aa8018610b7cd7f7c9376caee29866eb97cb74ad242df4b7ef6e9821",
+              "score": 0.0
+            }
+          ]
+        }
+      }
+    },
+    "preflight_cost_note": "Each arm carries 2 failed preflight proposal reservations and their elapsed time; at most 4 new proposal attempts remain. The 5 baseline measurements are reused without new calls, with all original evaluation costs charged.",
+    "baseline_gate_allowed": true,
+    "baseline_gate_sha256": "29f131c7da634e099dec4c11a62d262bfc181b146db88f381edae4c6e1c18c1a",
+    "baseline_results": {
+      "A": {
+        "score": 0.0,
+        "budget_used": {
+          "proposals_used": 2,
+          "evaluations_used": 1,
+          "seconds_used": 571.5222189570013
+        }
+      },
+      "B": {
+        "score": 0.0,
+        "budget_used": {
+          "proposals_used": 2,
+          "evaluations_used": 2,
+          "seconds_used": 1139.3898417920027
+        }
+      },
+      "C": {
+        "score": 0.0,
+        "budget_used": {
+          "proposals_used": 2,
+          "evaluations_used": 2,
+          "seconds_used": 1052.2841682930048
+        }
+      }
+    },
+    "results": {
+      "A": {
+        "best": "c0000",
+        "best_score": 0.0,
+        "stop_reason": null,
+        "proposals_used": 3,
+        "evaluations_used": 2,
+        "seconds_used": 618.8140826659983,
+        "carried_preflight_reservations": 2,
+        "new_proposal_attempts": 1,
+        "generated_candidates": 1,
+        "active": "evaluation",
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.0,
+            "promoted": true,
+            "hash": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151"
+          },
+          {
+            "id": "c0001",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluating",
+            "hash": "d35789f66a149bbaa764c7d84d11863056c160c5818bfbbe306bc0c1c640bb12"
+          }
+        ],
+        "samples": {
+          "c0000": 1,
+          "c0001": 0
+        }
+      },
+      "B": {
+        "best": "c0000",
+        "best_score": 0.0,
+        "stop_reason": "step_limit",
+        "proposals_used": 2,
+        "evaluations_used": 2,
+        "seconds_used": 1139.3898417920027,
+        "carried_preflight_reservations": 2,
+        "new_proposal_attempts": 0,
+        "generated_candidates": 0,
+        "active": null,
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.0,
+            "confirmed": true,
+            "promoted": true,
+            "hash": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151"
+          }
+        ],
+        "samples": {
+          "c0000": 2
+        }
+      },
+      "C": {
+        "best": "c0000",
+        "best_score": 0.0,
+        "stop_reason": "step_limit",
+        "proposals_used": 2,
+        "evaluations_used": 2,
+        "seconds_used": 1052.2841682930048,
+        "carried_preflight_reservations": 2,
+        "new_proposal_attempts": 0,
+        "generated_candidates": 0,
+        "active": null,
+        "candidates": [
+          {
+            "id": "c0000",
+            "parents": [],
+            "status": "evaluated",
+            "score": 0.0,
+            "confirmed": true,
+            "promoted": true,
+            "hash": "ac40091f0390f890fceebb277099c78de7358f3a3c39a47b9c76361079a10151"
+          }
+        ],
+        "samples": {
+          "c0000": 2
+        }
+      }
+    }
   },
   "limitations": [
     "Synthetic scores are assigned fixtures, not measured harness improvement.",
@@ -699,7 +901,7 @@
     "limitations": "The cache is not a hermetic dependency lock; task-owned installation scripts may still consult package indexes."
   },
   "current_runner": {
-    "sha256": "50812a46be1227ab0d8233b143ec52837b70651907bc4d07d9d783c2a960bdd4",
+    "sha256": "a2868dd3cc73d111155f6542610bd5b6c1ae70dba541db938b276e9440730e6e",
     "old_experiment_not_resumable_after_fix": true,
     "support_hash": "189d85c62ab3c83e4676855767ee75add2f1d3cf2925f941258df339f7440c4b"
   },
@@ -785,6 +987,30 @@
         "rendered_prompt_sha256": "eda786e993e619e495e558a1b4ee139868c5e1d8b60ebc79025f1c6a4af02d3c",
         "method": "Exact rendered prompt matched in the executed Codex command log"
       }
+    },
+    {
+      "name": "abc-search-003",
+      "started": true,
+      "phase": "closed-outer-cli-pin-format-error",
+      "selected_tasks": [
+        "terminal-bench/cargo-flight-dispatch",
+        "terminal-bench/batched-eval-parity"
+      ],
+      "search_started": false,
+      "plan_hash": "44cbf73efc7638ec18906261028e09a29740012e4b963374319100df64bd7651",
+      "budget_per_arm": {
+        "max_proposals": 6,
+        "max_evaluations": 8,
+        "max_seconds": 2400,
+        "proposal_timeout": 120,
+        "evaluation_timeout": 900
+      },
+      "max_task_trials_per_arm": 16,
+      "holdout_evaluated": false,
+      "reason": "Numeric-only version configured while adapter required full codex-cli version output; no model proposal request emitted.",
+      "model_proposal_calls": 0,
+      "baseline_gate_allowed": true,
+      "preflight_failures_per_arm": 2
     }
   ]
 }

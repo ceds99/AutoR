@@ -76,3 +76,26 @@ class BaselineOrchestrationTests(unittest.TestCase):
         gate,calls=self.run_gate({})
         self.assertTrue(gate['allowed']);self.assertEqual(calls,3)
         self.assertEqual(gate['not_run_arms'],[])
+
+
+class OuterCliPreflightTests(unittest.TestCase):
+    def test_short_and_full_versions_store_the_actual_full_output(self):
+        from types import SimpleNamespace
+        with patch.object(compare_search.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='codex-cli 1.2.3\n')):
+            for pin in ['1.2.3','codex-cli 1.2.3']:
+                self.assertEqual(compare_search.verify_outer_cli('fixture',pin),'codex-cli 1.2.3')
+
+    def test_wrong_version_is_rejected(self):
+        from types import SimpleNamespace
+        with patch.object(compare_search.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='codex-cli 1.2.4\n')):
+            with self.assertRaises(AutorError):compare_search.verify_outer_cli('fixture','1.2.3')
+
+    def test_adopted_preflight_cost_does_not_bypass_seed_state_check(self):
+        state={'proposals_used':2,'config':{'proposer':{'executable':'fixture','cli_version':'codex-cli 1.2.3'}}}
+        with tempfile.TemporaryDirectory() as temp, patch.object(compare_search,'check'), patch.object(
+                compare_search.engine,'load',return_value=state), patch.object(compare_search,'verify_outer_cli'), patch.object(
+                compare_search.engine,'Experiment') as experiment:
+            write_json(Path(temp)/'baseline-gate.json',{'allowed':True,'seed_results':{'A':{'budget':{'proposals_used':2}}},
+                'seed_state_hashes':{'A':'mismatched'}})
+            with self.assertRaisesRegex(AutorError,'Seed state changed'):compare_search.search(temp)
+            experiment.assert_not_called()

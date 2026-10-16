@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import re
 import signal
+import subprocess
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from autor import engine
@@ -41,9 +42,19 @@ def natural_failure(trial):
             'verifier_stdout_sha256':sha(trial/'verifier/test-stdout.txt')}
 
 
+def verify_outer_cli(executable, expected):
+    """Canonicalize an exact numeric pin before any expensive baseline work."""
+    result=subprocess.run([executable,'--version'],capture_output=True,text=True,timeout=10)
+    actual=result.stdout.strip()
+    if result.returncode or not actual.startswith('codex-cli ') or expected not in (actual,actual[len('codex-cli '):]):
+        raise AutorError('Outer Codex CLI version does not match the requested pin')
+    return actual
+
+
 def prepare(args):
     root=Path(args.root).resolve();pilot=Path(args.pilot).resolve()
     if root.exists():raise AutorError('Choose a new comparison directory')
+    cli_version=verify_outer_cli(args.codex,args.codex_version)
     meta=load(pilot);gate=natural_failure(args.failure_trial)
     tasks=meta['evaluator']['task_names']
     if gate['task'] not in tasks:raise AutorError('Failure task must be in the fixed comparison set')
@@ -64,7 +75,7 @@ def prepare(args):
     settings=meta['evaluator']
     common=harbor_preset(args.outer_model,settings['model'],settings['agent_version'],tasks)
     common['objective']+=' Diagnose failures from execution feedback; do not embed task answers or task-name dispatch.'
-    common['proposer'].update(executable=args.codex,cli_version=args.codex_version,reasoning_effort='low')
+    common['proposer'].update(executable=args.codex,cli_version=cli_version,reasoning_effort='low')
     common['evaluator']={'kind':'command','require_activation_file':'prompt.md','task_names':tasks,
         'argv':[sys.executable,str(Path(__file__).with_name('frozen_harbor_evaluator.py')),
             '--pilot',str(pilot),'--pilot-sha256',sha(pilot/'pilot.json'),
@@ -135,11 +146,14 @@ def baselines(root):
 def search(root):
     root=Path(root);plan=check(root);gate=read_json(root/'baseline-gate.json')
     if not gate['allowed']:raise AutorError('Baseline reproduction gate blocked comparison: '+str(gate['reasons']))
+    for name in ['A','B','C']:
+        proposer=engine.load(root/name)['config']['proposer']
+        verify_outer_cli(proposer['executable'],proposer['cli_version'])
     results={}
     for name in ['A','B','C']:
         state=engine.load(root/name)
         # Before first proposal, verify the exact seed state approved by the gate.
-        if state['proposals_used']==0 and digest(state)!=gate['seed_state_hashes'][name]:
+        if state['proposals_used']==gate['seed_results'][name]['budget']['proposals_used'] and digest(state)!=gate['seed_state_hashes'][name]:
             raise AutorError('Seed state changed after gate')
         state=engine.Experiment(root/name).run()
         completed=sum(len(s['tasks']) for c in state['candidates'] for s in c.get('samples',[])) if name!='A' else sum(len(c.get('task_scores',[])) for c in state['candidates'] if c['status']=='evaluated')
