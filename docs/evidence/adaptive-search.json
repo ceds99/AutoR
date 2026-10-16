@@ -604,15 +604,15 @@
     },
     "results": {
       "A": {
-        "best": "c0000",
-        "best_score": 0.0,
+        "best": "c0002",
+        "best_score": 0.5,
         "stop_reason": null,
-        "proposals_used": 3,
-        "evaluations_used": 2,
-        "seconds_used": 618.8140826659983,
+        "proposals_used": 5,
+        "evaluations_used": 4,
+        "seconds_used": 1945.1131064570036,
         "carried_preflight_reservations": 2,
-        "new_proposal_attempts": 1,
-        "generated_candidates": 1,
+        "new_proposal_attempts": 3,
+        "generated_candidates": 3,
         "active": "evaluation",
         "candidates": [
           {
@@ -628,13 +628,35 @@
             "parents": [
               "c0000"
             ],
-            "status": "evaluating",
+            "status": "evaluated",
+            "score": 0.0,
+            "promoted": false,
             "hash": "d35789f66a149bbaa764c7d84d11863056c160c5818bfbbe306bc0c1c640bb12"
+          },
+          {
+            "id": "c0002",
+            "parents": [
+              "c0000"
+            ],
+            "status": "evaluated",
+            "score": 0.5,
+            "promoted": true,
+            "hash": "d965237ff48efe24fe63d228c7ca1cdd87db5582423c7bb6dbc323c66e1dad66"
+          },
+          {
+            "id": "c0003",
+            "parents": [
+              "c0002"
+            ],
+            "status": "evaluating",
+            "hash": "6895d5b705090edbfbc90a779331cb69c2126c53e01ac8fa340f5a2751301e32"
           }
         ],
         "samples": {
           "c0000": 1,
-          "c0001": 0
+          "c0001": 1,
+          "c0002": 1,
+          "c0003": 0
         }
       },
       "B": {

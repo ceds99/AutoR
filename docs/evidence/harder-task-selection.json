@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "status": "cargo-natural-failure-found-third-baseline-gate-running",
+  "status": "screening-complete-reproduction-gate-passed",
   "source": {
     "repository": "https://github.com/harbor-framework/terminal-bench.git",
     "revision": "452bf305c6daa62fc59061d22133a7cbc7c1572e",
@@ -192,5 +192,14 @@
     "seed_prompt_verified": true,
     "no_accepted_aggregate": true
   },
-  "selection_reason": "Cargo has eight concrete assertion failures; batched evaluation gives a second task at lower cost than the ~8-minute finance agent or 10-round WAL verifier."
+  "selection_reason": "Cargo has eight concrete assertion failures; batched evaluation gives a second task at lower cost than the ~8-minute finance agent or 10-round WAL verifier.",
+  "selected_failure_reproduction": {
+    "task": "terminal-bench/cargo-flight-dispatch",
+    "screening_failures": 1,
+    "formal_seed_failures": 5,
+    "all_five_full_baseline_scores": 0.0,
+    "gate_allowed": true,
+    "baseline_source": "abc-search-003",
+    "continuation": "abc-search-004"
+  }
 }
